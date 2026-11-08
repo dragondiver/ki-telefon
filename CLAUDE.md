@@ -1,4 +1,4 @@
-# telefon-ai — Projekt-Kontext für Claude
+# ki-telefon — Projekt-Kontext für Claude
 
 ## Worum es geht
 
@@ -67,7 +67,7 @@ der Pi 5. (Ein CM5-Versuch scheiterte an defekter Hardware — Historie in
   Keine zweite NLU-Schicht.
 - **Phase-1-Scope:** Nur Telefon + Tool-Definitionen. Tool-Aufruf schreibt
   ausschließlich in SQLite. Kein Agent-Code, keine Rückkanäle in Phase 1.
-- **Der allgemeine Agent ist bewusst KEIN Teil von telefon-ai.** Im
+- **Der allgemeine Agent ist bewusst KEIN Teil von ki-telefon.** Im
   Brainstorming vom 2026-08-09 stellte sich heraus, dass der ursprünglich
   angedachte „Hermes lokal auf einem Pi" eigentlich ein autonomer,
   mehrere-Provider-fähiger Agent auf einem noch zu kaufenden Mini-PC
