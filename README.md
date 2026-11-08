@@ -8,6 +8,13 @@ vorschlagen, Aufgaben für später notieren.
 Inspiriert vom Make-Magazin-Projekt „KI-Telefon" (Ausgabe 2/26), aber
 eigenständig implementiert und auf einen agentischen Pfad ausgebaut.
 
+Fotos, Schaltplan und Bauprotokoll stehen auf der
+[Projektseite](https://dragondiver.github.io/ki-telefon/projekt/) (Deutsch und Englisch).
+
+Eine Einschränkung vorab: Der Französischkurs (Rolle 3) kommt aus dem Paket
+`sprachkurs`, das in einem privaten Repository liegt und in `pyproject.toml`
+als feste Abhängigkeit steht. Ohne Lesezugriff darauf schlägt `uv sync` fehl.
+
 ```
 ┌──────────────┐    PCM16 24kHz    ┌─────────────────────────┐
 │  Wählscheibe │ ─────────────────▶│  OpenAI Realtime API    │
