@@ -1,0 +1,50 @@
+[Unit]
+Description=KI-Telefon (FeTAp 611)
+Documentation=https://github.com/dragondiver/ki-telefon
+# sound.target wartet nicht auf die USB-Karte — die taucht erst ein paar
+# Sekunden nach dem Boot auf. Deshalb unten Restart=always ohne Start-Limit:
+# der erste Versuch darf scheitern, der zweite fängt ihn auf.
+After=network-online.target sound.target
+Wants=network-online.target
+# Niemals endgueltig aufgeben. Ein Geraet im Wohnzimmer hat keine Konsole,
+# auf der jemand "systemctl reset-failed" tippt.
+# Gehoert nach [Unit] — in [Service] wird der Schluessel still ignoriert.
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=florian
+WorkingDirectory=/home/florian/telefon-ai
+# HA_URL/HA_TOKEN fuer den Anrufzaehler (#69) liegen in derselben Datei wie
+# fuer pi_status.py. Das "-" macht die Datei optional: fehlt sie, startet das
+# Telefon trotzdem, es meldet dann nur nichts an Home Assistant.
+EnvironmentFile=-/etc/pi-status.env
+# Die Plattform-Werte stehen hier und nicht in der .env: Dieselbe .env
+# (1Password-Environment telefon-ai/.env) gilt auf Mac und Pi, siehe
+# heim-agent#87. Eine Umgebungsvariable schlaegt die .env, in
+# pydantic-settings wie in load_dotenv. Auf dem Mac gelten die Standardwerte
+# aus config.py (mac, Halbduplex).
+Environment=KITELEFON_PLATFORM=pi
+Environment=KITELEFON_HALF_DUPLEX=false
+# Voller Pfad: uv liegt nur im PATH der Login-Shell, systemd hat den nicht.
+# --no-sync, damit der Start nicht von einem Netzwerk-Dependency-Resolve
+# abhaengt — das Venv steht, es soll einfach starten.
+ExecStart=/home/florian/.local/bin/uv run --no-sync python -m kitelefon
+
+# SIGINT statt SIGTERM: __main__.py faengt KeyboardInterrupt ab und laeuft
+# durch seine finally-Bloecke — vor allem bell.close(). Bei SIGTERM stirbt
+# Python sofort, und eine Klingelspule koennte unter ~27 V bestromt
+# stehenbleiben.
+KillSignal=SIGINT
+TimeoutStopSec=10
+# Das SIGINT geht an die ganze Control-Group, also stirbt auch der uv-Wrapper
+# daran: Exit 130 (128+SIGINT). Python darunter hat da schon sauber
+# aufgeraeumt. Ohne diese Zeile bucht systemd jeden normalen Stopp als
+# "Failed" — und ein Log voller bedeutungsloser Fehler verdeckt die echten.
+SuccessExitStatus=130
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

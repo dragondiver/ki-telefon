@@ -1,0 +1,42 @@
+version: 2
+
+# sprachkurs ist eine private Git-Abhaengigkeit (telefon-ai#81, #82). Dependabot
+# braucht dafuer ein eigenes Secret SPRACHKURS_READ_TOKEN unter
+# Settings -> Secrets -> Dependabot (Actions-Secrets sieht Dependabot nicht).
+registries:
+  sprachkurs:
+    type: git
+    url: https://github.com
+    username: x-access-token
+    password: ${{secrets.SPRACHKURS_READ_TOKEN}}
+
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(ci)"
+
+  - package-ecosystem: uv
+    directory: "/"
+    registries:
+      - sprachkurs
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+    commit-message:
+      prefix: "chore(deps)"

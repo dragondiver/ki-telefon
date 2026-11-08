@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dpkg -l)",
+      "Read(//etc/**)",
+      "Read(//home/florian/**)",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(grep -E \"^\\\\.env$|token_|tasks\\\\.db|playlists\\\\.json$\")",
+      "Read(//etc/systemd/**)",
+      "Bash(systemctl list-unit-files *)",
+      "Read(//sys/firmware/devicetree/base/**)",
+      "Bash(PYTHONUNBUFFERED=1 .venv/bin/python -u scripts/test_dial.py)",
+      "Bash(PYTHONUNBUFFERED=1 .venv/bin/python -u scripts/test_gpio.py)",
+      "Bash(PYTHONUNBUFFERED=1 .venv/bin/python -u scripts/test_bell.py)",
+      "Bash(PYTHONUNBUFFERED=1 .venv/bin/python -u scripts/test_bell_static.py)",
+      "Skill(fewer-permission-prompts)",
+      "Skill(fewer-permission-prompts:*)",
+      "Bash(ls -t ~/.claude/projects/*/*.jsonl 2>/dev/null | head -50 | wc -l *)",
+      "Read(//home/florian/.claude/projects/**)"
+    ]
+  }
+}

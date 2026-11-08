@@ -1,0 +1,8 @@
+{
+  "_doc": "Shortcuts für Playlists, die nicht in /me/playlists auftauchen (z.B. von anderen geteilte Listen). URI in Spotify-App holen: Playlist öffnen → ⋯ → Teilen → Spotify-URI kopieren. Dann hier eintragen, speichern als playlists.json. NICHT mehr erreichbar (seit Nov 2024 für Drittanbieter gesperrt, GET /playlists/{id} → 404): Daylist, Discover Weekly, Release Radar — dafür gibt spotify_play eine feste Antwort. Beim ersten Musikwunsch prüft der Dienst jede ID einmal und meldet tote Einträge im Journal.",
+  "konto1": {
+    "saigon soul revival": "spotify:playlist:DEINE_PLAYLIST_ID"
+  },
+  "konto2": {
+  }
+}

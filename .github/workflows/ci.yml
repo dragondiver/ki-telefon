@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Manuell anstossbar (gh workflow run ci.yml): noetig, um nach dem
+  # Erneuern von SPRACHKURS_READ_TOKEN den sprachkurs-Zugriff zu pruefen,
+  # ohne einen Wegwerf-Commit zu machen. Am 11.09. lief genau das in eine
+  # 422-Sackgasse.
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # sprachkurs ist eine Git-Abhaengigkeit auf festem Commit (telefon-ai#81)
+      # und privat; das GITHUB_TOKEN gilt nur fuer DIESES Repo. uv holt ueber
+      # git, deshalb biegt insteadOf die https-URL auf das Token um.
+      # SPRACHKURS_READ_TOKEN ist ein fine-grained PAT mit Contents:read
+      # auf dragondiver/sprachkurs (Settings -> Secrets -> Actions).
+      - name: Git-Zugriff auf sprachkurs
+        env:
+          TOKEN: ${{ secrets.SPRACHKURS_READ_TOKEN }}
+        run: git config --global url."https://x-access-token:${TOKEN}@github.com/dragondiver/".insteadOf "https://github.com/dragondiver/"
+
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: "3.11"
+          enable-cache: true
+
+      # uv.lock muss zu pyproject.toml passen, sonst loest `uv run`
+      # stillschweigend neu auf und CI testet etwas anderes als das Lockfile.
+      # Im September 2026 lief Dependabot noch als `pip` und hob nur
+      # pyproject.toml an; seit der Umstellung auf `uv` (sprachkurs#54) pflegt
+      # es uv.lock mit. Der Check bleibt als Netz fuer Hand-Aenderungen.
+      - name: Check lockfile
+        run: uv lock --check
+
+      # src/kitelefon/audio.py imports sounddevice at module level, which loads
+      # the PortAudio shared library. It is not on the runner image.
+      - name: Install PortAudio
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libportaudio2
+
+      # Seit 19.08. verwenden die Tests relative Importe (`from test_realtime import ...`
+      # statt dotted-Importe). `python -m pytest` ist bewährter Standard und bleibt zur
+      # Sicherheit. Marker in pyproject schließen bereits die `live` und `pi` Tests aus.
+      - name: Lint und Formatierung (ruff)
+        run: |
+          uv run --extra dev ruff check .
+          uv run --extra dev ruff format --check .
+
+      - name: Run tests
+        run: uv run --extra dev python -m pytest -q

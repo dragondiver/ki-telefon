@@ -1,0 +1,57 @@
+name: Audit
+
+# Separate from ci.yml on purpose: this job needs no database, no system
+# libraries and no secrets, so it also runs green on Dependabot pull requests.
+#
+# The schedule is the point of this workflow. A lockfile that is clean today
+# becomes vulnerable the moment a new advisory is published against a version
+# already pinned in it — without a periodic run, nothing would notice until
+# someone happened to open a pull request.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # 05:30 UTC, shortly before the daily code review routine reads the repos.
+    - cron: "30 5 * * *"
+  # Manuell anstossbar, z. B. direkt nach einem Dependency-Bump statt auf
+  # den naechtlichen Lauf zu warten.
+  workflow_dispatch:
+
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: "3.11"
+          enable-cache: true
+
+      # Audit the lockfile rather than an installed environment. --frozen uses
+      # uv.lock exactly as committed instead of re-resolving, so what is audited
+      # is what actually gets installed. (It does not verify the lock against
+      # pyproject.toml -- that would be --locked, which re-resolves and would
+      # have to fetch the private sprachkurs repo and its secret.)
+      #
+      # --no-emit-package sprachkurs drops the `sprachkurs @ git+https://…`
+      # line. pip-audit would try to clone the private repo to build it and
+      # fail without a token. Dropping it costs no coverage: sprachkurs' own
+      # dependencies are resolved into this lockfile and are still audited —
+      # only the git line itself goes. It is also what lets this job run
+      # without SPRACHKURS_READ_TOKEN, unlike the test job in ci.yml.
+      - name: Export locked dependencies
+        run: uv export --frozen --no-emit-project --no-emit-package sprachkurs --format requirements-txt > requirements-audit.txt
+
+      # pip-audit is deliberately unpinned. It resolves advisories against the
+      # PyPI advisory database at run time, and pinning the tool is the kind of
+      # thing that quietly ages out on a security check.
+      - name: Audit dependencies
+        run: uvx pip-audit -r requirements-audit.txt --progress-spinner off
