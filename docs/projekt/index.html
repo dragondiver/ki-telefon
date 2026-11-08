@@ -239,13 +239,6 @@ figcaption .quelle { display: block; font-size: .74rem; margin-top: 2px; }
 .werte b { display: block; font: 500 1.4rem/1.1 var(--f-text); color: var(--tinte); }
 .werte span { font-size: .78rem; color: var(--tinte-2); }
 @media (max-width: 639px) { .werte { grid-template-columns: repeat(2, minmax(0, 1fr)); } .werte div:nth-child(3) { border-left: 0; padding-left: 0; } .werte div:nth-child(n+3) { border-top: 1px solid var(--linie); } }
-.mess-rahmen { margin-top: 8px; overflow-x: auto; }
-#messung { width: 100%; min-width: 460px; height: auto; display: block; }
-#messung text { font-family: var(--f-text); font-size: 11px; fill: var(--tinte-2); }
-#messung .achse { stroke: var(--linie-2); stroke-width: 1; }
-#messung .gitter { stroke: var(--linie); stroke-width: 1; }
-#messung .punkt { fill: var(--orange); }
-#messung .punkt.leer { fill: var(--grund); stroke: var(--orange); stroke-width: 1.5; }
 
 /* Störungsbuch */
 .buch { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(32px, 4vw, 56px); border-top: 1px solid var(--linie-2); }
@@ -563,19 +556,14 @@ td code { font: 400 .82rem/1.4 var(--f-mono); color: var(--tinte); white-space: 
       </div>
       <div>
         <p class="etikett"><span lang="de">Klingel · gemessen am 29. Juli 2026</span><span lang="en">Bell · measured on 29 July 2026</span></p>
-        <h2><span lang="de">Der Pi ging aus. Schuld waren vier lose Drähte.</span><span lang="en">The Pi kept switching off. Four loose wires were to blame.</span></h2>
-        <p class="satz" style="margin-top:18px"><span lang="de">Beim Testen der Klingel ging der Pi mehrmals komplett aus. Zuerst hatte ich die Weckerspule im Verdacht. Die Messung zeigte etwas anderes: Die Spule hat 1654 Ω und zieht bei 27 V nur 16 mA. Die 5-V-Schiene des Pi fiel selbst unter Dauerlast nicht unter 4,97 V. Schuld waren vier Drähte, die am Step-up-Wandler nur eingehängt waren. Seit ich sie festgelötet habe, ist der Pi nicht mehr ausgegangen.</span><span lang="en">While I was testing the bell, the Pi switched off completely several times. My first suspect was the ringer coil. The measurement showed otherwise: the coil has 1654 Ω and draws only 16 mA at 27 V. The Pi's 5 V rail never dropped below 4.97 V, even under continuous load. The culprit was four wires that were only hooked into the boost converter. Since I soldered them, the Pi has not switched off again.</span></p>
-        <div class="werte">
+        <h2><span lang="de">Der Wecker braucht 27 Volt.</span><span lang="en">The ringer needs 27 volts.</span></h2>
+        <div class="werte" style="margin-top:18px">
           <div><b>1654 Ω</b><span lang="de">Spule</span><span lang="en">coil</span></div>
           <div><b>27 V</b><span lang="de">am Wecker</span><span lang="en">at the ringer</span></div>
           <div><b>16 mA</b><span lang="de">Spulenstrom</span><span lang="en">coil current</span></div>
           <div><b>25 Hz</b><span lang="de">wie bei der Post</span><span lang="en">post office standard</span></div>
         </div>
-        <p class="satz"><span lang="de">Danach blieb der Wecker stumm. Die Vorlage aus dem Make-Magazin fährt die Spule mit halbem Tastgrad bei 30 V. Mein Wandler schafft aber nur 27 V, und bei halbem Tastgrad bleibt zu wenig Strom, um den Anker zu bewegen. Mit vollem Tastgrad und 25 Hz klingelt er. 25 Hz ist die Rufwechselspannung der Post, und im Vergleich mit 10 und 20 Hz klang sie am besten.</span><span lang="en">Then the ringer stayed silent. The Make magazine design drives the coil at half duty cycle and 30 V. My converter only manages 27 V, and at half duty there is not enough current to move the armature. At full duty and 25 Hz it rings. 25 Hz is the post office's ringing frequency, and compared with 10 and 20 Hz it sounded best.</span></p>
-        <div class="mess-rahmen">
-          <svg id="messung" viewBox="0 0 560 170" role="img" aria-labelledby="messung-titel"><title id="messung-titel">Spannung der 5-V-Schiene beim Lasttest</title></svg>
-        </div>
-        <p class="leise"><span lang="de">5-V-Schiene des Pi beim Lasttest, ausgelesen über den Spannungsregler des Pi. Gefüllt: Messwerte unter Last.</span><span lang="en">The Pi's 5 V rail during the load test, read from the Pi's power management chip. Filled: readings under load.</span></p>
+        <p class="satz"><span lang="de">Die Vorlage aus dem Make-Magazin fährt die Spule mit halbem Tastgrad bei 30 V. Mein Wandler schafft aber nur 27 V, und bei halbem Tastgrad bleibt zu wenig Strom, um den Anker zu bewegen. Mit vollem Tastgrad und 25 Hz klingelt er. 25 Hz ist die Rufwechselspannung der Post, und im Vergleich mit 10 und 20 Hz klang sie am besten.</span><span lang="en">The Make magazine design drives the coil at half duty cycle and 30 V. My converter only manages 27 V, and at half duty there is not enough current to move the armature. At full duty and 25 Hz it rings. 25 Hz is the post office's ringing frequency, and compared with 10 and 20 Hz it sounded best.</span></p>
       </div>
     </div>
   </div>
@@ -596,7 +584,6 @@ td code { font: 400 .82rem/1.4 var(--f-mono); color: var(--tinte); white-space: 
       <li><time datetime="2026-06-08">08.06.2026</time><div><h3><span lang="de">Das Lötpad ist nicht der Schalter</span><span lang="en">The pad is not the switch</span></h3></div><p><span lang="de">Mein erster Draht für den Gabelschalter saß auf einem Pad, das über eine Leiterbahn fest mit dem Nachbarn verbunden war. Den echten Kontakt fand ich mit dem Durchgangsprüfer, während ich den Federarm von Hand drückte.</span><span lang="en">My first hook switch wire sat on a pad that a trace tied permanently to its neighbour. I found the real contact with a continuity tester while pressing the spring arm by hand.</span></p></li>
       <li><time datetime="2026-06-08">08.06.2026</time><div><h3><span lang="de">Entprellen ist Pflicht</span><span lang="en">Debouncing is a must</span></h3></div><p><span lang="de">Ohne Entprellen startete das Programm beim Abheben einen Anruf nach dem anderen. Seitdem gelten 200 ms für die Gabel und 80 ms für die Wählscheibe. Am Abend lief das erste Gespräch: „Moin moin, hier ist Hein …“</span><span lang="en">Without debouncing, lifting the handset started one call after another. Since then the hook switch uses 200 ms and the dial 80 ms. That evening the first conversation worked: “Moin moin, hier ist Hein …”</span></p></li>
       <li><time datetime="2026-07-19">19.–26.07.2026</time><div><h3><span lang="de">Ein Umweg über das Compute Module 5</span><span lang="en">A detour via the Compute Module 5</span></h3></div><p><span lang="de">Ein kleineres Board hätte besser ins Gehäuse gepasst. Die Trägerplatine war aber defekt, also bin ich nach einer Woche zum Pi 5 zurück. Dabei lernte ich, dass die Soundkarte nur 48 kHz kann und ALSA die 24 kHz umrechnen muss.</span><span lang="en">A smaller board would have fitted the case better. But the carrier board was faulty, so after a week I went back to the Pi 5. Along the way I learned that the sound card only does 48 kHz and ALSA has to resample the 24 kHz stream.</span></p></li>
-      <li><time datetime="2026-07-29">29.07.2026</time><div><h3><span lang="de">Lose Drähte am Wandler</span><span lang="en">Loose wires at the converter</span></h3></div><p><span lang="de">Die Geschichte von der Klingel oben. Geht ein Pi 5 einfach aus, statt neu zu starten, und meldet keine Unterspannung, dann ist es ein Kontaktproblem.</span><span lang="en">The bell story above. When a Pi 5 simply switches off instead of rebooting and reports no undervoltage, it is a contact problem.</span></p></li>
       <li><time datetime="2026-08-19">19.08.2026</time><div><h3><span lang="de">Erfundene Sätze im Protokoll</span><span lang="en">Invented sentences in the transcript</span></h3></div><p><span lang="de">Das alte Transkriptionsmodell schrieb ganze englische Sätze ins Gesprächsprotokoll, die niemand gesagt hatte. Ich bin auf ein neueres Modell umgestiegen.</span><span lang="en">The old transcription model wrote whole English sentences into the call transcript that nobody had said. I switched to a newer model.</span></p></li>
       <li><time datetime="2026-10-18">18.10.2026</time><div><h3><span lang="de">Nur noch Netzbrummen</span><span lang="en">Nothing but mains hum</span></h3></div><p><span lang="de">Neun Tage lang kam kein verständliches Wort an. Eine Aufnahme direkt von der Soundkarte zeigte, dass rund drei Viertel der Energie bei 50, 100 und 200 Hz lagen. Der Mikrofoneingang hing offen. Ein Wackelkontakt im Hörerkabel, provisorisch behoben, die richtige Reparatur steht noch aus.</span><span lang="en">For nine days not one intelligible word got through. A recording straight from the sound card showed about three quarters of the energy at 50, 100 and 200 Hz. The mic input was floating. A loose contact in the handset cord, patched up for now; the proper repair is still to do.</span></p></li>
       <li><time datetime="2026-11-08">08.11.2026</time><div><h3><span lang="de">Der Wackelkontakt ist zurück</span><span lang="en">The loose contact is back</span></h3></div><p><span lang="de">Das Provisorium vom Oktober hat nicht gehalten. Diesmal habe ich die Stelle gefunden, die Teile für die Reparatur sind bestellt.</span><span lang="en">The October patch did not last. This time I found the spot, and the parts for the repair are on order.</span></p></li>
@@ -659,7 +646,7 @@ td code { font: 400 .82rem/1.4 var(--f-mono); color: var(--tinte); white-space: 
       <div style="display:grid; gap:18px; align-content:start">
         <p class="satz"><span lang="de">Am Mac ersetzt die Tastatur das Telefon: Die Leertaste ist der Gabelschalter, die Ziffern 1 bis 9 sind die Wählscheibe. Gabel, Wählscheibe und Klingel stecken hinter derselben Schnittstelle, ob am Mac oder am Pi.</span><span lang="en">On the Mac the keyboard stands in for the phone: the space bar is the hook switch, the digits 1 to 9 are the dial. Hook switch, dial and bell sit behind the same interface, whether on the Mac or on the Pi.</span></p>
         <div class="befehl">KITELEFON_PLATFORM=mac uv run kitelefon</div>
-        <p class="satz"><span lang="de">Jede Festlegung halte ich mit Datum und Begründung in einem GitHub-Issue fest. Bevor ich Teile tausche, messe ich nach. Bei der Klingel und beim Mikrofon lag der Fehler am Ende woanders als vermutet.</span><span lang="en">I record every decision with date and reason in a GitHub issue. Before swapping parts, I measure. With the bell and with the microphone, the fault turned out to be somewhere other than I had thought.</span></p>
+        <p class="satz"><span lang="de">Jede Festlegung halte ich mit Datum und Begründung in einem GitHub-Issue fest.</span><span lang="en">I record every decision with date and reason in a GitHub issue.</span></p>
       </div>
     </div>
   </div>
@@ -940,35 +927,6 @@ document.getElementById("klingel-knopf").addEventListener("click", function () {
   });
   setTimeout(function () { weckerLaeuft = false; }, 3400);
 });
-
-/* ---------- Messwerte 5-V-Schiene (docs/stromversorgung.md, 29.07.2026) ---------- */
-(function messung() {
-  var svg = document.getElementById("messung");
-  var REIHEN = [
-    [{ de: "Leerlauf", en: "Idle" }, [5.119], true],
-    [{ de: "100-ms-Puls, 50 %", en: "100 ms pulse, 50 %" }, [5.123], false],
-    [{ de: "2 s Last, 50 %", en: "2 s load, 50 %" }, [5.124, 5.112, 5.119, 5.111], false],
-    [{ de: "2 s Last, 100 %", en: "2 s load, 100 %" }, [5.140, 5.071, 4.967, 5.138], false]
-  ];
-  var X0 = 150, X1 = 540, V0 = 4.90, V1 = 5.20;
-  function x(v) { return X0 + (v - V0) / (V1 - V0) * (X1 - X0); }
-  function zeichnen() {
-    while (svg.lastChild && svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
-    var h = "";
-    [4.90, 5.00, 5.10, 5.20].forEach(function (v) {
-      h += '<line class="gitter" x1="' + x(v) + '" x2="' + x(v) + '" y1="10" y2="140"/>';
-      h += '<text x="' + x(v) + '" y="158" text-anchor="middle">' + v.toFixed(2).replace(".", sprache === "de" ? "," : ".") + ' V</text>';
-    });
-    h += '<line class="achse" x1="' + X0 + '" x2="' + X1 + '" y1="140" y2="140"/>';
-    REIHEN.forEach(function (r, i) {
-      var y = 26 + i * 32;
-      h += '<text x="0" y="' + (y + 4) + '">' + L(r[0]) + '</text>';
-      r[1].forEach(function (v) { h += '<circle class="punkt' + (r[2] ? " leer" : "") + '" cx="' + x(v).toFixed(1) + '" cy="' + y + '" r="5"><title>' + v.toFixed(3) + ' V</title></circle>'; });
-    });
-    svg.insertAdjacentHTML("beforeend", h);
-  }
-  zeichnen(); hoerer.push(zeichnen);
-})();
 
 /* ---------- Verkabelung: Drähte zeichnen sich beim Scrollen ---------- */
 (function plan() {
