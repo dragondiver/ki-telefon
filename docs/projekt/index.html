@@ -7,51 +7,48 @@
 <meta name="description" content="KI-Telefon: ein Posttelefon FeTAp 611-2 mit Raspberry Pi und neun Gesprächsfiguren. AI Telephone: a 1970s German rotary phone with a Raspberry Pi and nine characters to talk to.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,300..900;1,62..125,400..700&family=Azeret+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script>(function(){var q=/[?&]lang=(de|en)\b/.exec(location.search),s=null;try{s=localStorage.getItem("ta-sprache")}catch(e){}if(s!=="de"&&s!=="en")s=null;var l=(navigator.languages&&navigator.languages[0])||navigator.language||"en";document.documentElement.setAttribute("data-sprache",q?q[1]:s||(/^de\b/i.test(l)?"de":"en"));})();</script>
 <style>
-/* Layout: lange Seite, Text links, Wählscheibe rechts im Kopf; danach breite Abschnitte wie Blätter aus einem Störungsbuch der Post. */
+/* Gestaltung nach Dieter Rams: weniger, aber besser. Eine Schrift, ein Akzent (das Orange des Gehäuses),
+   flache Flächen, Haarlinien statt Schatten, Bewegung nur dort, wo sie etwas zeigt. */
 :root {
-  --grund: #e7e5e0;          /* Postgrau, leicht warm */
-  --grund-2: #f3f2ee;        /* Karten */
-  --grund-3: #dcd9d2;
-  --tinte: #1e1916;
-  --tinte-2: #5a514a;
-  --orange: #d9531a;         /* Gehäuse FeTAp 611, orange */
-  --orange-2: #f08a52;
-  --auf-orange: #fff8f2;
-  --platine: #5b3220;        /* Platine, braun */
-  --kupfer: #a8682a;
-  --violett: #6a4fb0; --gelb: #d49a12; --gruen: #2e8a4e; --blau: #2f62b5; --rot: #c8352b; --weiss: #bdb7ae;
-  --linie: rgba(30,25,22,.14);
-  --linie-2: rgba(30,25,22,.28);
-  --schatten: 0 1px 0 rgba(255,255,255,.6) inset, 0 18px 40px -24px rgba(60,30,10,.45);
-  --f-titel: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --f-text: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --f-mono: "Azeret Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --grund: #ebeae6;          /* warmes Hellgrau wie ein Gerätegehäuse */
+  --grund-2: #f6f5f2;
+  --grund-3: #dddcd7;
+  --tinte: #1b1b1a;
+  --tinte-2: #62615d;
+  --orange: #d9531a;         /* Gehäuse FeTAp 611, einziger Akzent */
+  --orange-2: #e8743f;
+  --auf-orange: #ffffff;
+  --platine: #4a4846;
+  --kupfer: #9a6a35;         /* nur für Pins im Schaltplan */
+  --violett: #6a4fb0; --gelb: #d49a12; --gruen: #2e8a4e; --blau: #2f62b5; --rot: #c8352b; --weiss: #bdb7ae; /* Drahtfarben */
+  --linie: rgba(0,0,0,.12);
+  --linie-2: rgba(0,0,0,.26);
+  --f-text: "Instrument Sans", "Helvetica Neue", Helvetica, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   --rand: max(16px, env(safe-area-inset-left, 0px));
   --rand-r: max(16px, env(safe-area-inset-right, 0px));
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --grund: #1c130e; --grund-2: #281b14; --grund-3: #33231a;
-    --tinte: #f1e8de; --tinte-2: #b6a596;
-    --orange: #ff7840; --orange-2: #ffa070; --auf-orange: #1c130e;
-    --platine: #3d2417; --kupfer: #d49a5c;
+    --grund: #191918; --grund-2: #222221; --grund-3: #2c2c2a;
+    --tinte: #ebeae6; --tinte-2: #a3a29d;
+    --orange: #ff7a3d; --orange-2: #ff9a68; --auf-orange: #191918;
+    --platine: #3a3937; --kupfer: #c9935a;
     --violett: #a78bf0; --gelb: #f0c040; --gruen: #5cc47f; --blau: #7aa6f0; --rot: #f0705f; --weiss: #e9e2d8;
-    --linie: rgba(241,232,222,.13); --linie-2: rgba(241,232,222,.26);
-    --schatten: 0 1px 0 rgba(255,255,255,.05) inset, 0 20px 40px -24px rgba(0,0,0,.8);
+    --linie: rgba(255,255,255,.12); --linie-2: rgba(255,255,255,.26);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --grund: #1c130e; --grund-2: #281b14; --grund-3: #33231a;
-  --tinte: #f1e8de; --tinte-2: #b6a596;
-  --orange: #ff7840; --orange-2: #ffa070; --auf-orange: #1c130e;
-  --platine: #3d2417; --kupfer: #d49a5c;
+  --grund: #191918; --grund-2: #222221; --grund-3: #2c2c2a;
+  --tinte: #ebeae6; --tinte-2: #a3a29d;
+  --orange: #ff7a3d; --orange-2: #ff9a68; --auf-orange: #191918;
+  --platine: #3a3937; --kupfer: #c9935a;
   --violett: #a78bf0; --gelb: #f0c040; --gruen: #5cc47f; --blau: #7aa6f0; --rot: #f0705f; --weiss: #e9e2d8;
-  --linie: rgba(241,232,222,.13); --linie-2: rgba(241,232,222,.26);
-  --schatten: 0 1px 0 rgba(255,255,255,.05) inset, 0 20px 40px -24px rgba(0,0,0,.8);
+  --linie: rgba(255,255,255,.12); --linie-2: rgba(255,255,255,.26);
   color-scheme: dark;
 }
 
@@ -64,247 +61,226 @@ html { scroll-behavior: smooth; }
 main { overflow-x: clip; }
 body {
   margin: 0; background: var(--grund); color: var(--tinte);
-  font: 400 1.0625rem/1.6 var(--f-text); font-variation-settings: "wdth" 96;
+  font: 400 1.0625rem/1.6 var(--f-text);
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
-  background-image:
-    radial-gradient(circle at 1px 1px, var(--linie) 1px, transparent 1.4px),
-    radial-gradient(1200px 700px at 88% -10%, color-mix(in srgb, var(--orange) 16%, transparent), transparent 70%);
-  background-size: 24px 24px, 100% 100%;
-  background-attachment: scroll, fixed;
 }
-a { color: inherit; text-decoration-color: var(--orange); text-underline-offset: .2em; }
-a:hover { color: var(--orange); }
-:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 4px; }
-h1, h2, h3 { margin: 0; text-wrap: balance; font-family: var(--f-titel); }
-h1 { font-size: clamp(2.4rem, 9vw, 6.6rem); line-height: .9; font-weight: 850; font-variation-settings: "wdth" 125; letter-spacing: -.02em; text-transform: uppercase; }
-h2 { font-size: clamp(1.7rem, 3.6vw, 2.6rem); line-height: 1.08; font-weight: 750; font-variation-settings: "wdth" 112; letter-spacing: -.01em; }
-h3 { font-size: 1.12rem; line-height: 1.25; font-weight: 700; font-variation-settings: "wdth" 104; }
+a { color: inherit; text-decoration-color: var(--linie-2); text-underline-offset: .2em; }
+a:hover { text-decoration-color: var(--orange); }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 2px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; font-family: var(--f-text); }
+h1 { font-size: clamp(2.6rem, 8vw, 4.4rem); line-height: 1; font-weight: 600; letter-spacing: -.025em; }
+h2 { font-size: clamp(1.45rem, 2.6vw, 1.9rem); line-height: 1.2; font-weight: 600; letter-spacing: -.01em; }
+h3 { font-size: 1.05rem; line-height: 1.3; font-weight: 600; }
 p { margin: 0; }
-.etikett { font: 500 .74rem/1.3 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--tinte-2); }
+.etikett { font: 500 .78rem/1.3 var(--f-text); letter-spacing: .02em; color: var(--tinte-2); }
 .etikett b { color: var(--orange); font-weight: 600; }
 .satz { max-width: 62ch; color: var(--tinte); }
-.leise { color: var(--tinte-2); font-size: .92rem; }
+.leise { color: var(--tinte-2); font-size: .9rem; }
 .mono { font-family: var(--f-mono); font-size: .86em; }
 .nur-schmal { display: none; }
 @media (max-width: 899px) { .nur-breit { display: none; } .nur-schmal { display: inline; } }
 
 .innen-rand { padding-left: var(--rand); padding-right: var(--rand-r); }
-.breite { max-width: 1180px; margin-inline: auto; }
+.breite { max-width: 1120px; margin-inline: auto; }
 
 /* Kopfleiste */
-.kopf { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 14px); right: calc(env(safe-area-inset-right, 0px) + 14px); z-index: 20; display: flex; gap: 8px; }
-.sprachwahl { display: inline-flex; padding: 3px; border: 1px solid var(--linie-2); border-radius: 999px; background: color-mix(in srgb, var(--grund) 82%, transparent); backdrop-filter: blur(8px); cursor: pointer; font: 600 .72rem/1 var(--f-mono); color: var(--tinte); }
-.sprachwahl span { padding: 6px 9px; border-radius: 999px; }
+.kopf { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px); right: calc(env(safe-area-inset-right, 0px) + 12px); z-index: 20; }
+.sprachwahl { display: inline-flex; padding: 2px; border: 1px solid var(--linie-2); border-radius: 4px; background: var(--grund); cursor: pointer; font: 500 .72rem/1 var(--f-text); letter-spacing: .04em; color: var(--tinte); }
+.sprachwahl span { padding: 6px 9px; border-radius: 2px; }
 
-/* Navigation als Nummernkarte */
-.wahlkarte { position: fixed; left: calc(env(safe-area-inset-left, 0px) + 14px); top: 50%; transform: translateY(-50%); z-index: 15; display: flex; flex-direction: column; gap: 2px; font: 500 .68rem/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
-.wahlkarte a { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--tinte-2); padding: 5px 6px; border-radius: 4px; }
-.wahlkarte a i { font-style: normal; width: 1.4em; height: 1.4em; display: grid; place-items: center; border: 1px solid var(--linie-2); border-radius: 50%; font-size: .62rem; transition: background .25s, color .25s, border-color .25s; }
-.wahlkarte a span { opacity: 0; transform: translateX(-4px); transition: opacity .2s, transform .2s; white-space: nowrap; }
-.wahlkarte:hover a span, .wahlkarte a.aktiv span { opacity: 1; transform: none; }
-.wahlkarte a.aktiv i { background: var(--orange); border-color: var(--orange); color: var(--auf-orange); }
+/* Abschnittsnummern am linken Rand */
+.wahlkarte { position: fixed; left: calc(env(safe-area-inset-left, 0px) + 16px); top: 50%; transform: translateY(-50%); z-index: 15; display: flex; flex-direction: column; gap: 2px; font: 500 .72rem/1 var(--f-text); }
+.wahlkarte a { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--tinte-2); padding: 5px 0; }
+.wahlkarte a i { font-style: normal; width: 1.2em; text-align: right; font-variant-numeric: tabular-nums; }
+.wahlkarte a span { opacity: 0; transition: opacity .15s; white-space: nowrap; }
+.wahlkarte:hover a span, .wahlkarte a.aktiv span { opacity: 1; }
+.wahlkarte a.aktiv { color: var(--tinte); }
+.wahlkarte a.aktiv i { color: var(--orange); }
 @media (max-width: 1279px) { .wahlkarte { display: none; } }
 
 /* Auftakt */
-.auftakt { padding-block: clamp(56px, 9vw, 110px) 40px; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: clamp(24px, 5vw, 72px); align-items: start; }
+.auftakt { padding-block: clamp(64px, 9vw, 112px) 48px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); align-items: start; }
 .auftakt > * { min-width: 0; }
-.auftakt .text { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-top: 10px; }
-.auftakt h1 .zeile2 { display: block; color: var(--orange); }
-@media (min-width: 900px) { .auftakt h1 { font-size: clamp(2.4rem, 6vw, 4.7rem); } }
-.massreihe { display: flex; flex-wrap: wrap; gap: 8px; }
-.massreihe span { font: 400 .8rem/1 var(--f-mono); padding: 9px 11px; border: 1px solid var(--linie-2); border-radius: 3px; background: var(--grund-2); }
-.massreihe b { font-weight: 600; color: var(--orange); }
-.stand { display: flex; gap: 10px; align-items: baseline; font-size: .92rem; color: var(--tinte-2); max-width: 60ch; }
-.lampe { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--gruen); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gruen) 25%, transparent); transform: translateY(-1px); }
-.lampe.gelb { background: var(--gelb); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gelb) 25%, transparent); }
+.auftakt .text { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.auftakt h1 .zeile2 { display: block; }
+.massreihe { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0 16px; border-top: 1px solid var(--linie-2); border-bottom: 1px solid var(--linie-2); }
+.massreihe span { font: 400 .82rem/1.2 var(--f-text); color: var(--tinte-2); padding: 12px 0; min-width: 0; }
+@media (max-width: 479px) { .massreihe { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.massreihe b { display: block; font-weight: 500; font-size: 1.15rem; color: var(--tinte); }
+.massreihe i { font-style: normal; }
+.stand { display: flex; gap: 10px; align-items: baseline; font-size: .9rem; color: var(--tinte-2); max-width: 60ch; }
+.lampe { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--gruen); transform: translateY(-1px); }
+.lampe.gelb { background: var(--gelb); }
 @media (max-width: 899px) { .auftakt { grid-template-columns: minmax(0, 1fr); } }
-.heute { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px); align-items: end; padding-bottom: clamp(56px, 8vw, 96px); }
+.heute { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: end; padding-bottom: clamp(64px, 8vw, 96px); }
 .heute > * { min-width: 0; }
 .heute figure { margin: 0; }
-.heute img { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: var(--schatten); }
-.heute-text { display: grid; gap: 12px; padding-bottom: 8px; }
+.heute img { width: 100%; height: auto; display: block; border-radius: 2px; }
+.heute-text { display: grid; gap: 12px; }
 @media (max-width: 899px) { .heute { grid-template-columns: minmax(0, 1fr); } }
 
 /* Wählscheibe */
 .buehne { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; justify-items: center; }
-.scheibe-rahmen { position: relative; width: min(100%, 460px); aspect-ratio: 1; max-width: 100%; }
+.scheibe-rahmen { position: relative; width: min(100%, 440px); aspect-ratio: 1; max-width: 100%; }
 #scheibe { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
 #scheibe .loch { cursor: grab; }
 #scheibe.zieht .loch { cursor: grabbing; }
 .impulse { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); display: flex; gap: 5px; }
-.impulse i { width: 8px; height: 8px; border-radius: 50%; background: var(--linie-2); transition: background .05s; }
-.impulse i.an { background: var(--orange); box-shadow: 0 0 10px var(--orange); }
-.wahl-hinweis { font: 500 .72rem/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--tinte-2); text-align: center; }
-.wahl-tasten { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-.wahl-tasten button, .knopf { font: 600 .8rem/1 var(--f-mono); color: var(--tinte); background: var(--grund-2); border: 1px solid var(--linie-2); border-radius: 999px; padding: 9px 12px; cursor: pointer; transition: background .2s, color .2s, border-color .2s, transform .15s; }
-.wahl-tasten button { width: 2.4rem; padding: 9px 0; }
-.wahl-tasten button:hover, .knopf:hover { border-color: var(--orange); }
-.wahl-tasten button[aria-pressed="true"] { background: var(--orange); color: var(--auf-orange); border-color: var(--orange); }
+.impulse i { width: 6px; height: 6px; border-radius: 50%; background: var(--linie-2); }
+.impulse i.an { background: var(--orange); }
+.wahl-hinweis { font-size: .82rem; color: var(--tinte-2); text-align: center; }
+.wahl-tasten { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+.wahl-tasten button, .knopf { font: 500 .85rem/1 var(--f-text); color: var(--tinte); background: var(--grund-2); border: 1px solid var(--linie-2); border-radius: 4px; padding: 10px 14px; cursor: pointer; }
+.wahl-tasten button { width: 2.4rem; padding: 10px 0; }
+.wahl-tasten button:hover, .knopf:hover { border-color: var(--tinte); }
+.wahl-tasten button[aria-pressed="true"] { background: var(--tinte); color: var(--grund); border-color: var(--tinte); }
 .knopf.haupt { background: var(--orange); color: var(--auf-orange); border-color: var(--orange); }
-.knopf.haupt:hover { background: var(--tinte); border-color: var(--tinte); color: var(--grund); }
-.knopf:active { transform: scale(.97); }
+.knopf.haupt:hover { background: var(--orange-2); border-color: var(--orange-2); }
 .knopf[disabled] { opacity: .5; cursor: default; }
-.schalter { display: inline-flex; align-items: center; gap: 8px; font: 500 .74rem/1 var(--f-mono); color: var(--tinte-2); cursor: pointer; }
+.schalter { display: inline-flex; align-items: center; gap: 8px; font-size: .82rem; color: var(--tinte-2); cursor: pointer; }
 .schalter input { accent-color: var(--orange); width: 1rem; height: 1rem; }
 
-.figur { width: min(100%, 460px); background: var(--grund-2); border: 1px solid var(--linie); border-radius: 6px; padding: 18px 20px 20px; box-shadow: var(--schatten); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 18px; position: relative; overflow: hidden; }
-.figur::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--orange); }
-.figur .ziffer { grid-row: span 3; font: 850 3.4rem/.9 var(--f-titel); font-variation-settings: "wdth" 125; color: var(--orange); min-width: 1.1em; }
-.figur h3 { font-size: 1.3rem; }
-.figur .art { font: 500 .72rem/1.4 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--tinte-2); }
-.figur p.beschr { grid-column: 2; font-size: .96rem; margin-top: 4px; }
-.figur.neu { animation: karte .5s cubic-bezier(.2,.8,.2,1); }
-@keyframes karte { from { transform: translateY(8px); opacity: .3; } to { transform: none; opacity: 1; } }
+.figur { width: min(100%, 440px); border-top: 1px solid var(--linie-2); padding: 16px 0 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 16px; }
+.figur .ziffer { grid-row: span 3; font: 500 2.6rem/1 var(--f-text); color: var(--orange); min-width: 1em; }
+.figur h3 { font-size: 1.2rem; }
+.figur .art { font-size: .78rem; color: var(--tinte-2); }
+.figur p.beschr { grid-column: 2; font-size: .94rem; margin-top: 4px; }
+.figur.neu { animation: karte .3s ease-out; }
+@keyframes karte { from { opacity: .3; } to { opacity: 1; } }
 
 /* Abschnitte */
-.abschnitt { padding-block: clamp(64px, 9vw, 120px); border-top: 1px solid var(--linie); position: relative; }
-.abschnitt-kopf { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px clamp(24px, 5vw, 64px); align-items: end; margin-bottom: clamp(32px, 5vw, 56px); }
+.abschnitt { padding-block: clamp(64px, 9vw, 112px); border-top: 1px solid var(--linie-2); }
+.abschnitt-kopf { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px clamp(32px, 5vw, 64px); align-items: start; margin-bottom: clamp(32px, 5vw, 48px); }
 .abschnitt-kopf > * { min-width: 0; }
-.abschnitt-kopf .etikett { margin-bottom: 14px; }
+.abschnitt-kopf .etikett { margin-bottom: 8px; }
 @media (max-width: 899px) { .abschnitt-kopf { grid-template-columns: minmax(0, 1fr); } }
 
 /* Anruf-Ablauf */
-.ablauf { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; counter-reset: schritt; position: relative; }
-.ablauf li { list-style: none; padding: 18px 16px 20px; border-left: 1px solid var(--linie-2); position: relative; transition: background .35s; min-width: 0; }
-.ablauf li:last-child { border-right: 1px solid var(--linie-2); }
-.ablauf li::before { counter-increment: schritt; content: counter(schritt); font: 850 2rem/1 var(--f-titel); font-variation-settings: "wdth" 125; color: var(--linie-2); display: block; margin-bottom: 10px; transition: color .3s; }
-.ablauf li .zustand { font: 600 .7rem/1 var(--f-mono); letter-spacing: .06em; color: var(--tinte-2); display: inline-block; padding: 4px 6px; border: 1px solid var(--linie-2); border-radius: 3px; margin-bottom: 10px; }
+.ablauf { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; counter-reset: schritt; padding: 0; margin: 0; border-top: 1px solid var(--linie-2); }
+.ablauf li { list-style: none; padding: 16px 16px 20px 0; position: relative; min-width: 0; }
+.ablauf li + li { padding-left: 16px; border-left: 1px solid var(--linie); }
+.ablauf li::before { counter-increment: schritt; content: counter(schritt); font: 500 1.1rem/1 var(--f-text); color: var(--tinte-2); display: block; margin-bottom: 12px; }
+.ablauf li .zustand { font: 400 .74rem/1 var(--f-mono); color: var(--tinte-2); display: block; margin-bottom: 8px; }
 .ablauf li h3 { margin-bottom: 6px; }
-.ablauf li p { font-size: .92rem; color: var(--tinte-2); }
-.ablauf li.jetzt { background: color-mix(in srgb, var(--orange) 11%, transparent); }
-.ablauf li.jetzt::before { color: var(--orange); }
-.ablauf li.jetzt .zustand { background: var(--orange); color: var(--auf-orange); border-color: var(--orange); }
-.ablauf { padding: 0; margin: 0; }
-@media (max-width: 899px) { .ablauf { grid-template-columns: minmax(0, 1fr); } .ablauf li { border-right: 1px solid var(--linie-2); border-bottom: 1px solid var(--linie-2); } .ablauf li:first-child { border-top: 1px solid var(--linie-2); } }
-.leitung { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-top: 22px; }
-.leitung .anzeige { font: 500 .85rem/1.4 var(--f-mono); color: var(--tinte-2); min-height: 1.4em; flex: 1 1 260px; min-width: 0; }
-.leitung .anzeige q { color: var(--tinte); font-family: var(--f-text); font-style: italic; font-size: 1rem; }
+.ablauf li p { font-size: .9rem; color: var(--tinte-2); }
+.ablauf li.jetzt::before, .ablauf li.jetzt .zustand { color: var(--orange); }
+.ablauf li.jetzt { box-shadow: inset 0 2px 0 var(--orange); }
+@media (max-width: 899px) { .ablauf { grid-template-columns: minmax(0, 1fr); } .ablauf li, .ablauf li + li { padding: 16px 0; border-left: 0; border-bottom: 1px solid var(--linie); } }
+.leitung { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-top: 24px; }
+.leitung .anzeige { font-size: .88rem; color: var(--tinte-2); min-height: 1.4em; flex: 1 1 260px; min-width: 0; }
+.leitung .anzeige q { color: var(--tinte); font-style: italic; }
 
 /* Werkzeuge */
-.werkzeuge { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 0; margin: 0; }
-.werkzeuge li { list-style: none; background: var(--grund-2); border: 1px solid var(--linie); border-radius: 6px; padding: 18px 18px 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
-.werkzeuge q { font: 500 1.08rem/1.35 var(--f-titel); font-variation-settings: "wdth" 100; quotes: "„" "“"; display: block; }
+.werkzeuge { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 32px; padding: 0; margin: 0; }
+.werkzeuge li { list-style: none; border-top: 1px solid var(--linie-2); padding: 16px 0 28px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.werkzeuge q { font-size: 1.05rem; line-height: 1.4; font-weight: 500; quotes: "„" "“"; display: block; }
 :root[data-sprache="en"] .werkzeuge q { quotes: "“" "”"; }
-.werkzeuge p { font-size: .93rem; color: var(--tinte-2); }
-.werkzeuge .fn { font: 500 .7rem/1.5 var(--f-mono); color: var(--kupfer); word-break: break-word; }
+.werkzeuge p { font-size: .92rem; color: var(--tinte-2); }
+.werkzeuge .fn { font: 400 .74rem/1.5 var(--f-mono); color: var(--tinte-2); word-break: break-word; }
 @media (max-width: 1023px) { .werkzeuge { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 639px) { .werkzeuge { grid-template-columns: minmax(0, 1fr); } }
-.dienst { margin-top: 18px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
-.dienst > div { border-top: 2px solid var(--tinte); padding-top: 12px; min-width: 0; }
+.dienst { margin-top: 16px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 32px; }
+.dienst > div { border-top: 1px solid var(--tinte); padding-top: 16px; min-width: 0; }
 .dienst h3 { margin-bottom: 6px; }
-.dienst p { font-size: .95rem; color: var(--tinte-2); }
-@media (max-width: 639px) { .dienst { grid-template-columns: minmax(0, 1fr); } }
+.dienst p { font-size: .94rem; color: var(--tinte-2); }
+@media (max-width: 639px) { .dienst { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
 
 /* Innenleben */
-.fotoreihe { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px; align-items: start; }
+.fotoreihe { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; align-items: start; }
 .fotoreihe figure, .foto-einzel { margin: 0; min-width: 0; }
-.fotoreihe img, .foto-einzel img { width: 100%; height: auto; display: block; border-radius: 4px; background: var(--grund-3); }
+.fotoreihe img, .foto-einzel img { width: 100%; height: auto; display: block; border-radius: 2px; background: var(--grund-3); }
 figcaption { font-size: .84rem; color: var(--tinte-2); margin-top: 8px; line-height: 1.45; }
-figcaption .quelle { display: block; font: 400 .68rem/1.5 var(--f-mono); margin-top: 3px; color: var(--tinte-2); opacity: .85; }
+figcaption .quelle { display: block; font-size: .74rem; margin-top: 2px; }
 @media (max-width: 899px) { .fotoreihe { grid-template-columns: 1fr 1fr; } .fotoreihe figure:first-child { grid-column: 1 / -1; } }
-.vorher { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: center; margin-bottom: clamp(40px, 6vw, 72px); }
+.vorher { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: center; margin-bottom: clamp(48px, 6vw, 72px); }
 .vorher > * { min-width: 0; }
-.vorher .zwei { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; align-items: end; }
+.vorher .zwei { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; align-items: end; }
 @media (max-width: 899px) { .vorher { grid-template-columns: minmax(0, 1fr); } }
 
-.plan-rahmen { margin-top: clamp(40px, 6vw, 72px); background: var(--grund-2); border: 1px solid var(--linie); border-radius: 6px; padding: clamp(16px, 3vw, 28px); }
-.plan-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; align-items: baseline; margin-bottom: 14px; }
+.plan-rahmen { margin-top: clamp(48px, 6vw, 72px); border-top: 1px solid var(--linie-2); padding-top: 16px; }
+.plan-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; align-items: baseline; margin-bottom: 16px; }
 .plan-scroll { overflow-x: auto; }
 #plan { width: 100%; min-width: 620px; height: auto; display: block; }
-#plan text { font-family: var(--f-mono); fill: var(--tinte); }
+#plan text { font-family: var(--f-text); fill: var(--tinte); }
 #plan .klein { font-size: 10px; fill: var(--tinte-2); }
-#plan .kasten { fill: var(--grund); stroke: var(--linie-2); stroke-width: 1; }
-#plan .pi { fill: color-mix(in srgb, var(--gruen) 14%, var(--grund)); stroke: var(--gruen); }
+#plan .kasten { fill: var(--grund-2); stroke: var(--linie-2); stroke-width: 1; }
+#plan .pi { fill: var(--grund-2); stroke: var(--tinte); }
 #plan .draht { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 #plan .geist { fill: none; stroke: var(--linie-2); stroke-width: 3; stroke-dasharray: 2 5; stroke-linecap: round; }
 #plan .pin { fill: var(--kupfer); }
 
-.teile { margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.teile { margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
 .teile li { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--linie); }
-.teile b { font-weight: 650; }
+.teile b { font-weight: 600; }
 .teile span { font-size: .9rem; color: var(--tinte-2); }
 @media (max-width: 639px) { .teile { grid-template-columns: minmax(0, 1fr); } }
 
 /* Klingel */
-.klingel { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
+.klingel { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
 .klingel > * { min-width: 0; }
 @media (max-width: 899px) { .klingel { grid-template-columns: minmax(0, 1fr); } }
 .wecker-bild { display: grid; justify-items: center; gap: 16px; }
-#wecker { width: min(100%, 320px); height: auto; overflow: visible; }
-#wecker .glocke { fill: url(#glanz); stroke: var(--tinte-2); stroke-width: 1.5; }
+#wecker { width: min(100%, 300px); height: auto; overflow: visible; }
+#wecker .glocke { fill: #c9c8c3; stroke: var(--tinte-2); stroke-width: 1.5; }
 #wecker .koeppel { transform-origin: 160px 250px; }
 #wecker.klingelt .koeppel { animation: schlag .04s linear infinite alternate; }
 #wecker.klingelt .glocke-g { animation: zittern .04s linear infinite alternate; }
 @keyframes schlag { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
 @keyframes zittern { from { transform: translateX(-.8px); } to { transform: translateX(.8px); } }
-#wecker .welle { fill: none; stroke: var(--orange); stroke-width: 2; opacity: 0; }
+#wecker .welle { fill: none; stroke: var(--orange); stroke-width: 1.5; opacity: 0; }
 #wecker.klingelt .welle { animation: welle .6s ease-out infinite; }
 #wecker.klingelt .welle.w2 { animation-delay: .3s; }
-@keyframes welle { from { opacity: .8; transform: scale(.9); } to { opacity: 0; transform: scale(1.25); } }
+@keyframes welle { from { opacity: .7; transform: scale(.9); } to { opacity: 0; transform: scale(1.2); } }
 #wecker .welle { transform-origin: 160px 150px; }
 .werte { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 24px 0; border-top: 1px solid var(--linie-2); border-bottom: 1px solid var(--linie-2); }
-.werte div { padding: 14px 12px 12px 0; min-width: 0; }
+.werte div { padding: 12px 12px 12px 0; min-width: 0; }
 .werte div + div { padding-left: 12px; border-left: 1px solid var(--linie); }
-.werte b { display: block; font: 800 1.6rem/1 var(--f-titel); font-variation-settings: "wdth" 115; color: var(--orange); font-variant-numeric: tabular-nums; }
-.werte span { font: 500 .68rem/1.35 var(--f-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--tinte-2); }
+.werte b { display: block; font: 500 1.4rem/1.1 var(--f-text); color: var(--tinte); }
+.werte span { font-size: .78rem; color: var(--tinte-2); }
 @media (max-width: 639px) { .werte { grid-template-columns: repeat(2, minmax(0, 1fr)); } .werte div:nth-child(3) { border-left: 0; padding-left: 0; } .werte div:nth-child(n+3) { border-top: 1px solid var(--linie); } }
-.mess-rahmen { margin-top: 10px; overflow-x: auto; }
+.mess-rahmen { margin-top: 8px; overflow-x: auto; }
 #messung { width: 100%; min-width: 460px; height: auto; display: block; }
-#messung text { font-family: var(--f-mono); font-size: 11px; fill: var(--tinte-2); }
+#messung text { font-family: var(--f-text); font-size: 11px; fill: var(--tinte-2); }
 #messung .achse { stroke: var(--linie-2); stroke-width: 1; }
 #messung .gitter { stroke: var(--linie); stroke-width: 1; }
 #messung .punkt { fill: var(--orange); }
 #messung .punkt.leer { fill: var(--grund); stroke: var(--orange); stroke-width: 1.5; }
 
 /* Störungsbuch */
-.buch { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 4vw, 56px); }
-.buch li { list-style: none; display: grid; grid-template-columns: 5.6rem minmax(0, 1fr); gap: 4px 16px; padding: 18px 0; border-bottom: 1px solid var(--linie); }
-.buch time { font: 600 .74rem/1.5 var(--f-mono); color: var(--orange); padding-top: 3px; }
+.buch { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(32px, 4vw, 56px); border-top: 1px solid var(--linie-2); }
+.buch li { list-style: none; display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: 4px 16px; padding: 16px 0; border-bottom: 1px solid var(--linie); }
+.buch time { font-size: .82rem; color: var(--tinte-2); padding-top: 2px; }
 .buch h3 { margin-bottom: 4px; }
-.buch p { font-size: .94rem; color: var(--tinte-2); grid-column: 2; }
+.buch p { font-size: .92rem; color: var(--tinte-2); grid-column: 2; }
 @media (max-width: 899px) { .buch { grid-template-columns: minmax(0, 1fr); } }
 
 /* Modelle */
-.tabelle { overflow-x: auto; border: 1px solid var(--linie); border-radius: 6px; background: var(--grund-2); }
+.tabelle { overflow-x: auto; border-top: 1px solid var(--linie-2); }
 table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .92rem; }
-th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--linie); vertical-align: top; }
-th { font: 600 .7rem/1.3 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--tinte-2); }
-tr:last-child td { border-bottom: 0; }
-td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: nowrap; }
-.grundsatz { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
-.grundsatz > div { border-top: 2px solid var(--tinte); padding-top: 12px; min-width: 0; }
+th, td { text-align: left; padding: 12px 16px 12px 0; border-bottom: 1px solid var(--linie); vertical-align: top; }
+th { font-size: .78rem; font-weight: 500; color: var(--tinte-2); }
+td code { font: 400 .82rem/1.4 var(--f-mono); color: var(--tinte); white-space: nowrap; }
+.grundsatz { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 32px; margin-top: 40px; }
+.grundsatz > div { border-top: 1px solid var(--tinte); padding-top: 16px; min-width: 0; }
 .grundsatz h3 { margin-bottom: 6px; }
-.grundsatz p { font-size: .94rem; color: var(--tinte-2); }
-@media (max-width: 899px) { .grundsatz { grid-template-columns: minmax(0, 1fr); } }
+.grundsatz p { font-size: .92rem; color: var(--tinte-2); }
+@media (max-width: 899px) { .grundsatz { grid-template-columns: minmax(0, 1fr); gap: 24px; } }
 
-/* Arbeitsweise und Kosten */
-.zwei-spalten { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); }
+/* Arbeitsweise */
+.zwei-spalten { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); }
 .zwei-spalten > * { min-width: 0; }
 @media (max-width: 899px) { .zwei-spalten { grid-template-columns: minmax(0, 1fr); } }
-.chronik { margin: 0; padding: 0; border-left: 2px solid var(--orange); }
-.chronik li { list-style: none; padding: 0 0 18px 18px; position: relative; }
-.chronik li::before { content: ""; position: absolute; left: -6px; top: .45em; width: 10px; height: 10px; border-radius: 50%; background: var(--grund); border: 2px solid var(--orange); }
-.chronik time { font: 600 .72rem/1.4 var(--f-mono); color: var(--tinte-2); display: block; }
-.befehl { margin-top: 10px; font: 500 .8rem/1.5 var(--f-mono); background: var(--platine); color: #f6e7d6; padding: 10px 12px; border-radius: 4px; overflow-x: auto; white-space: pre; }
-.entwurf-hinweis { border: 1.5px dashed var(--orange); border-radius: 6px; padding: 14px 16px; font-size: .93rem; color: var(--tinte-2); background: color-mix(in srgb, var(--orange) 6%, transparent); }
-.entwurf-hinweis b { color: var(--orange); }
+.chronik { margin: 0; padding: 0; border-top: 1px solid var(--linie-2); }
+.chronik li { list-style: none; display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--linie); }
+.chronik time { font-size: .82rem; color: var(--tinte-2); padding-top: 2px; }
+.befehl { margin-top: 8px; font: 400 .82rem/1.5 var(--f-mono); background: var(--grund-2); color: var(--tinte); border: 1px solid var(--linie); padding: 10px 12px; border-radius: 2px; overflow-x: auto; white-space: pre; }
 
-.schluss { padding-block: 40px 56px; border-top: 1px solid var(--linie); display: grid; gap: 18px; }
+.schluss { padding-block: 40px 64px; border-top: 1px solid var(--linie-2); display: grid; gap: 16px; }
 .nachweis { margin: 0; padding: 0; display: grid; gap: 8px; font-size: .84rem; color: var(--tinte-2); max-width: 90ch; }
 .nachweis li { list-style: none; }
 
-/* Auftritt beim Laden: sichtbar im Ruhezustand, nur die Bewegung wird gespielt */
-@media (prefers-reduced-motion: no-preference) {
-  .auftakt .text > * { animation: hoch .8s cubic-bezier(.2,.8,.2,1) both; }
-  .auftakt .text > *:nth-child(2) { animation-delay: .08s; }
-  .auftakt .text > *:nth-child(3) { animation-delay: .16s; }
-  .auftakt .text > *:nth-child(4) { animation-delay: .24s; }
-  .auftakt .text > *:nth-child(5) { animation-delay: .32s; }
-  .buehne { animation: dreh-rein 1.1s cubic-bezier(.2,.8,.2,1) both .1s; }
-}
-@keyframes hoch { from { transform: translateY(14px); } to { transform: none; } }
-@keyframes dreh-rein { from { transform: rotate(-24deg) scale(.94); } to { transform: none; } }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } #wecker.klingelt .koeppel, #wecker.klingelt .glocke-g, #wecker.klingelt .welle { animation: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } #wecker.klingelt .koeppel, #wecker.klingelt .glocke-g, #wecker.klingelt .welle, .figur.neu { animation: none; } }
 </style>
 </head>
 <body>
@@ -339,52 +315,31 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
         <span><b>25</b> Hz <i lang="de">Klingel</i><i lang="en">ringing</i></span>
         <span><b>24</b> kHz Audio</span>
       </div>
-      <p class="stand"><i class="lampe gelb" aria-hidden="true"></i><span><span lang="de">Läuft seit dem 8. Juni 2026 bei uns im Haus. Offen ist ein Wackelkontakt im Hörerkabel, den ich im Oktober nur provisorisch behoben habe.</span><span lang="en">In use at home since 8 June 2026. Still open: a loose contact in the handset cord, which I only patched up in October.</span></span></p>
+      <p class="stand"><i class="lampe gelb" aria-hidden="true"></i><span><span lang="de">Läuft seit dem 8. Juni 2026 bei uns im Haus. Gerade steht es still: Der Wackelkontakt im Hörerkabel ist wieder da, die Ersatzteile sind bestellt.</span><span lang="en">In use at home since 8 June 2026. Right now it is out of action: the loose contact in the handset cord is back, and the spare parts are on order.</span></span></p>
     </div>
 
     <div class="buehne" id="figuren">
       <div class="scheibe-rahmen">
         <svg id="scheibe" viewBox="0 0 400 400" role="img" aria-labelledby="scheibe-titel">
           <title id="scheibe-titel">Wählscheibe</title>
-          <defs>
-            <radialGradient id="gehaeuse" cx="40%" cy="35%" r="75%">
-              <stop offset="0" style="stop-color:var(--orange-2)"/>
-              <stop offset=".7" style="stop-color:var(--orange)"/>
-              <stop offset="1" style="stop-color:color-mix(in srgb, var(--orange) 70%, #000)"/>
-            </radialGradient>
-            <radialGradient id="ring" cx="50%" cy="45%" r="60%">
-              <stop offset="0" stop-color="#5d5a56"/>
-              <stop offset="1" stop-color="#3a3835"/>
-            </radialGradient>
-            <linearGradient id="glas" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
-              <stop offset=".5" stop-color="#ffffff" stop-opacity=".12"/>
-              <stop offset="1" stop-color="#ffffff" stop-opacity=".35"/>
-            </linearGradient>
-            <linearGradient id="metall" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#f4f4f2"/><stop offset=".5" stop-color="#a9a9a6"/><stop offset="1" stop-color="#e2e2df"/>
-            </linearGradient>
-            <filter id="weich" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#3a1a08" flood-opacity=".35"/></filter>
-          </defs>
-          <circle cx="200" cy="200" r="196" fill="url(#gehaeuse)"/>
-          <circle cx="200" cy="200" r="174" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="2"/>
-          <!-- Zahlenring -->
-          <circle cx="200" cy="200" r="168" fill="url(#ring)"/>
-          <g id="ziffern" font-family="Archivo, Arial, sans-serif" font-weight="700" font-size="25" text-anchor="middle" fill="#f6f3ec"></g>
+          <circle cx="200" cy="200" r="196" style="fill:var(--orange)"/>
+                    <!-- Zahlenring -->
+          <circle cx="200" cy="200" r="168" fill="#3f3d3a"/>
+          <g id="ziffern" font-family="Instrument Sans, Helvetica, sans-serif" font-weight="700" font-size="25" text-anchor="middle" fill="#f6f3ec"></g>
           <!-- Fingerlochscheibe, dreht sich -->
-          <g id="drehteil" filter="url(#weich)">
-            <path id="lochscheibe" fill="url(#glas)" stroke="#ffffff" stroke-opacity=".7" stroke-width="1.2" fill-rule="evenodd"/>
+          <g id="drehteil">
+            <path id="lochscheibe" fill="#ffffff" fill-opacity=".16" stroke="#ffffff" stroke-opacity=".7" stroke-width="1.2" fill-rule="evenodd"/>
             <g id="loecher"></g>
           </g>
           <!-- Mitte -->
           <circle cx="200" cy="200" r="66" fill="#4f4c48" stroke="#34322f" stroke-width="2"/>
           <rect x="150" y="186" width="100" height="28" rx="2" fill="#fff" stroke="#d5cfc4"/>
-          <text x="200" y="179" text-anchor="middle" font-family="Azeret Mono, monospace" font-size="9.5" letter-spacing="2" fill="#e4ded4" id="mitte-oben">FIGUR</text>
-          <text x="200" y="205" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="13" fill="#2a221d" id="mitte-name">WÄHLEN</text>
-          <text x="200" y="230" text-anchor="middle" font-family="Azeret Mono, monospace" font-size="9.5" letter-spacing="2" fill="#e4ded4" id="mitte-unten">1 – 9 · 0</text>
+          <text x="200" y="179" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="2" fill="#e4ded4" id="mitte-oben">FIGUR</text>
+          <text x="200" y="205" text-anchor="middle" font-family="Instrument Sans, Helvetica, sans-serif" font-weight="600" font-size="13" fill="#2a221d" id="mitte-name">WÄHLEN</text>
+          <text x="200" y="230" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="2" fill="#e4ded4" id="mitte-unten">1 – 9 · 0</text>
           <!-- Fingeranschlag -->
           <g id="anschlag" transform="rotate(30 200 200)">
-            <path d="M352 196 L392 189 Q398 200 392 211 L352 204 Z" fill="url(#metall)" stroke="#6f6f6c" stroke-width="1"/>
+            <path d="M352 196 L392 189 Q398 200 392 211 L352 204 Z" fill="#c9c8c4" stroke="#6f6f6c" stroke-width="1"/>
           </g>
         </svg>
         <div class="impulse" id="impulse" aria-hidden="true"></div>
@@ -409,8 +364,7 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
   <div class="breite">
     <div class="abschnitt-kopf">
       <div>
-        <p class="etikett"><span lang="de">Ein Anruf</span><span lang="en">A call</span></p>
-        <h2><span lang="de">Abheben, wählen, reden. Dazwischen passiert eine Menge.</span><span lang="en">Lift, dial, talk. A lot happens in between.</span></h2>
+        <h2><span lang="de">So läuft ein Anruf</span><span lang="en">How a call works</span></h2>
       </div>
       <p class="satz"><span lang="de">Das Programm führt jeden Anruf als Zustandsmaschine. Den Freiton nutze ich als Wartezeit: Während es im Hörer tutet, baut der Pi schon die Verbindung zur Realtime-API von OpenAI auf. Das Mikrofon gebe ich erst danach frei, sonst würde die KI den Freiton mithören.</span><span lang="en">The program runs each call as a state machine. I use the ringback tone as waiting time: while the handset beeps, the Pi is already opening the connection to OpenAI's Realtime API. The microphone only opens after that, otherwise the AI would hear the ringback tone too.</span></p>
     </div>
@@ -433,8 +387,7 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
   <div class="breite">
     <div class="abschnitt-kopf">
       <div>
-        <p class="etikett"><span lang="de">Werkzeuge</span><span lang="en">Tools</span></p>
-        <h2><span lang="de">Die Figuren reden nicht nur. Sie erledigen auch etwas.</span><span lang="en">The characters do more than talk. They get things done.</span></h2>
+        <h2><span lang="de">Was die Figuren erledigen</span><span lang="en">What the characters can do</span></h2>
       </div>
       <p class="satz"><span lang="de">Das Sprachmodell erkennt im Gespräch, was gewünscht ist, und ruft eines von 17 Werkzeugen auf. Ausgeführt wird der Aufruf von meinem Python-Code. Kurze Dinge passieren sofort, längere Aufgaben gehen in eine Warteschlange.</span><span lang="en">During the conversation the language model works out what is wanted and calls one of 17 tools. My Python code carries out the call. Short things happen right away, longer jobs go into a queue.</span></p>
     </div>
@@ -512,8 +465,7 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
   <div class="breite">
     <div class="abschnitt-kopf">
       <div>
-        <p class="etikett"><span lang="de">Innenleben</span><span lang="en">Inside</span></p>
-        <h2><span lang="de">Die Mechanik bleibt, die Amtsleitung geht.</span><span lang="en">The mechanics stay, the phone line goes.</span></h2>
+        <h2><span lang="de">Was im Gehäuse steckt</span><span lang="en">What is inside the case</span></h2>
       </div>
       <p class="satz"><span lang="de">Der FeTAp 611 war das Standardtelefon der Bundespost; man mietete es, statt es zu kaufen. Gebaut wurde er von mehreren Firmen, meiner stammt von Hagenuk. Für den Umbau habe ich den Übertrager und einen Kondensatorblock ausgelötet. Sie gehören zur Telefonleitung, die ich nicht mehr brauche, und machen Platz für den Pi.</span><span lang="en">The FeTAp 611 was the standard telephone of the German Bundespost; people rented it rather than bought it. Several companies built it, and mine was made by Hagenuk. For the conversion I desoldered the transformer and a capacitor block. They belong to the phone line, which I no longer need, and removing them makes room for the Pi.</span></p>
     </div>
@@ -593,11 +545,6 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
       <div class="wecker-bild">
         <svg id="wecker" viewBox="0 0 320 300" role="img" aria-labelledby="wecker-titel">
           <title id="wecker-titel">Wecker des Telefons mit Glocke und Klöppel</title>
-          <defs>
-            <radialGradient id="glanz" cx="38%" cy="30%" r="80%">
-              <stop offset="0" stop-color="#f6f6f3"/><stop offset=".45" stop-color="#bdbdb8"/><stop offset="1" stop-color="#77756f"/>
-            </radialGradient>
-          </defs>
           <circle class="welle" cx="160" cy="150" r="118"/>
           <circle class="welle w2" cx="160" cy="150" r="118"/>
           <g class="glocke-g">
@@ -610,7 +557,7 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
             <circle cx="160" cy="194" r="11" style="fill:var(--tinte)"/>
           </g>
           <rect x="112" y="248" width="96" height="34" rx="4" style="fill:var(--platine)"/>
-          <text x="160" y="270" text-anchor="middle" font-family="Azeret Mono, monospace" font-size="11" fill="#f2dfca">1654 Ω</text>
+          <text x="160" y="270" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#ebeae6">1654 Ω</text>
         </svg>
         <button class="knopf haupt" id="klingel-knopf" type="button"><span lang="de">Klingeln lassen (mit Ton)</span><span lang="en">Ring it (with sound)</span></button>
       </div>
@@ -639,10 +586,9 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
   <div class="breite">
     <div class="abschnitt-kopf">
       <div>
-        <p class="etikett"><span lang="de">Störungsbuch</span><span lang="en">Fault log</span></p>
-        <h2><span lang="de">Was schiefging, und was ich daraus mitnehme.</span><span lang="en">What went wrong, and what I took from it.</span></h2>
+        <h2><span lang="de">Störungsbuch</span><span lang="en">Fault log</span></h2>
       </div>
-      <p class="satz"><span lang="de">Die meisten Fehler lagen in der Hardware und nicht im Code. Ich halte jeden mit Datum fest.</span><span lang="en">Most faults were in the hardware, not in the code. I record each one with its date.</span></p>
+      <p class="satz"><span lang="de">Die meisten Fehler lagen in der Hardware. Ich halte jeden mit Datum fest.</span><span lang="en">Most faults were in the hardware. I record each one with its date.</span></p>
     </div>
     <ol class="buch">
       <li><time datetime="2026-06-07">07.06.2026</time><div><h3><span lang="de">Das Kohlemikrofon funktioniert</span><span lang="en">The carbon microphone works</span></h3></div><p><span lang="de">Fast hätte ich die alte Sprechkapsel gegen ein Elektretmikrofon getauscht. Ein Test mit einem normalen Headset hätte gleich gezeigt, dass die Soundkarte in Ordnung ist. Die Kapsel von damals läuft direkt am Mikrofoneingang.</span><span lang="en">I nearly replaced the old capsule with an electret microphone. A test with an ordinary headset would have shown right away that the sound card was fine. The original capsule works straight into the mic input.</span></p></li>
@@ -650,9 +596,10 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
       <li><time datetime="2026-06-08">08.06.2026</time><div><h3><span lang="de">Das Lötpad ist nicht der Schalter</span><span lang="en">The pad is not the switch</span></h3></div><p><span lang="de">Mein erster Draht für den Gabelschalter saß auf einem Pad, das über eine Leiterbahn fest mit dem Nachbarn verbunden war. Den echten Kontakt fand ich mit dem Durchgangsprüfer, während ich den Federarm von Hand drückte.</span><span lang="en">My first hook switch wire sat on a pad that a trace tied permanently to its neighbour. I found the real contact with a continuity tester while pressing the spring arm by hand.</span></p></li>
       <li><time datetime="2026-06-08">08.06.2026</time><div><h3><span lang="de">Entprellen ist Pflicht</span><span lang="en">Debouncing is a must</span></h3></div><p><span lang="de">Ohne Entprellen startete das Programm beim Abheben einen Anruf nach dem anderen. Seitdem gelten 200 ms für die Gabel und 80 ms für die Wählscheibe. Am Abend lief das erste Gespräch: „Moin moin, hier ist Hein …“</span><span lang="en">Without debouncing, lifting the handset started one call after another. Since then the hook switch uses 200 ms and the dial 80 ms. That evening the first conversation worked: “Moin moin, hier ist Hein …”</span></p></li>
       <li><time datetime="2026-07-19">19.–26.07.2026</time><div><h3><span lang="de">Ein Umweg über das Compute Module 5</span><span lang="en">A detour via the Compute Module 5</span></h3></div><p><span lang="de">Ein kleineres Board hätte besser ins Gehäuse gepasst. Die Trägerplatine war aber defekt, also bin ich nach einer Woche zum Pi 5 zurück. Dabei lernte ich, dass die Soundkarte nur 48 kHz kann und ALSA die 24 kHz umrechnen muss.</span><span lang="en">A smaller board would have fitted the case better. But the carrier board was faulty, so after a week I went back to the Pi 5. Along the way I learned that the sound card only does 48 kHz and ALSA has to resample the 24 kHz stream.</span></p></li>
-      <li><time datetime="2026-07-29">29.07.2026</time><div><h3><span lang="de">Lose Drähte statt schwaches Netzteil</span><span lang="en">Loose wires, not a weak supply</span></h3></div><p><span lang="de">Die Geschichte von der Klingel oben. Geht ein Pi 5 einfach aus, statt neu zu starten, und meldet keine Unterspannung, dann ist es ein Kontaktproblem.</span><span lang="en">The bell story above. When a Pi 5 simply switches off instead of rebooting and reports no undervoltage, it is a contact problem.</span></p></li>
+      <li><time datetime="2026-07-29">29.07.2026</time><div><h3><span lang="de">Lose Drähte am Wandler</span><span lang="en">Loose wires at the converter</span></h3></div><p><span lang="de">Die Geschichte von der Klingel oben. Geht ein Pi 5 einfach aus, statt neu zu starten, und meldet keine Unterspannung, dann ist es ein Kontaktproblem.</span><span lang="en">The bell story above. When a Pi 5 simply switches off instead of rebooting and reports no undervoltage, it is a contact problem.</span></p></li>
       <li><time datetime="2026-08-19">19.08.2026</time><div><h3><span lang="de">Erfundene Sätze im Protokoll</span><span lang="en">Invented sentences in the transcript</span></h3></div><p><span lang="de">Das alte Transkriptionsmodell schrieb ganze englische Sätze ins Gesprächsprotokoll, die niemand gesagt hatte. Ich bin auf ein neueres Modell umgestiegen.</span><span lang="en">The old transcription model wrote whole English sentences into the call transcript that nobody had said. I switched to a newer model.</span></p></li>
       <li><time datetime="2026-10-18">18.10.2026</time><div><h3><span lang="de">Nur noch Netzbrummen</span><span lang="en">Nothing but mains hum</span></h3></div><p><span lang="de">Neun Tage lang kam kein verständliches Wort an. Eine Aufnahme direkt von der Soundkarte zeigte, dass rund drei Viertel der Energie bei 50, 100 und 200 Hz lagen. Der Mikrofoneingang hing offen. Ein Wackelkontakt im Hörerkabel, provisorisch behoben, die richtige Reparatur steht noch aus.</span><span lang="en">For nine days not one intelligible word got through. A recording straight from the sound card showed about three quarters of the energy at 50, 100 and 200 Hz. The mic input was floating. A loose contact in the handset cord, patched up for now; the proper repair is still to do.</span></p></li>
+      <li><time datetime="2026-11-08">08.11.2026</time><div><h3><span lang="de">Der Wackelkontakt ist zurück</span><span lang="en">The loose contact is back</span></h3></div><p><span lang="de">Das Provisorium vom Oktober hat nicht gehalten. Diesmal habe ich die Stelle gefunden, die Teile für die Reparatur sind bestellt.</span><span lang="en">The October patch did not last. This time I found the spot, and the parts for the repair are on order.</span></p></li>
     </ol>
   </div>
 </section>
@@ -662,8 +609,8 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
   <div class="breite">
     <div class="abschnitt-kopf">
       <div>
-        <p class="etikett"><span lang="de">Modelle · Stand 1. November 2026</span><span lang="en">Models · as of 1 November 2026</span></p>
-        <h2><span lang="de">Ein Modell für das Gespräch, mehrere für die Arbeit dahinter.</span><span lang="en">One model for the conversation, several for the work behind it.</span></h2>
+        <p class="etikett"><span lang="de">Stand 1. November 2026</span><span lang="en">As of 1 November 2026</span></p>
+        <h2><span lang="de">Welche Modelle wo laufen</span><span lang="en">Which models run where</span></h2>
       </div>
       <p class="satz"><span lang="de">Welches Modell wo läuft, halte ich in einer eigenen Datei im Repository fest, mit dem Wert, der tatsächlich auf dem Gerät eingestellt ist. Eine monatliche Routine vergleicht sie mit dem Code und meldet, wenn ein Anbieter ein Modell abschaltet.</span><span lang="en">I keep a dedicated file in the repository that records which model runs where, including the value actually set on the device. A monthly routine compares it with the code and flags when a provider retires a model.</span></p>
     </div>
@@ -693,8 +640,7 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
   <div class="breite">
     <div class="abschnitt-kopf">
       <div>
-        <p class="etikett"><span lang="de">Arbeitsweise</span><span lang="en">Method</span></p>
-        <h2><span lang="de">Angefangen mit einem Heft, weitergebaut im Gespräch.</span><span lang="en">Started from a magazine, built on in conversation.</span></h2>
+        <h2><span lang="de">Wie das Telefon entstanden ist</span><span lang="en">How the phone came about</span></h2>
       </div>
       <p class="satz"><span lang="de">Die Idee stammt aus dem Projekt „KI-Telefon“ von Dirk Wahl in der Make, Ausgabe 2/26. Seinen Code habe ich gelesen und dann eine eigene Fassung geschrieben, mit expliziter Zustandsmaschine, Werkzeugen und Tests. Entwickelt habe ich sie im Gespräch mit Claude Code. Ich entscheide, was das Telefon können soll; Claude schreibt den Code, wertet Logs aus und rechnet Messungen nach.</span><span lang="en">The idea comes from Dirk Wahl's “KI-Telefon” project in Make magazine, issue 2/26. I read his code and then wrote my own version, with an explicit state machine, tools and tests. I developed it in conversation with Claude Code. I decide what the phone should do; Claude writes the code, reads logs and checks measurements.</span></p>
     </div>
@@ -707,7 +653,7 @@ td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: 
           <li><time>17.08.2026</time><span lang="de">Camille übernimmt die 3 als Französischkurs.</span><span lang="en">Camille takes over digit 3 as a French course.</span></li>
           <li><time>19.09.2026</time><span lang="de">Freisprechen über Elektra.</span><span lang="en">Speakerphone via Elektra.</span></li>
           <li><time>09.10.2026</time><span lang="de">Haushalts-Gedächtnis und Websuche.</span><span lang="en">Household memory and web search.</span></li>
-          <li><time>08.11.2026</time><span lang="de">212 Commits, rund 9500 Zeilen Python im Programm.</span><span lang="en">212 commits, about 9,500 lines of Python in the program.</span></li>
+          <li><time>08.11.2026</time><span lang="de">212 Commits, rund 9500 Zeilen Python. Seitdem liegt der Code öffentlich auf GitHub.</span><span lang="en">212 commits, about 9,500 lines of Python. Since then the code has been public on GitHub.</span></li>
         </ol>
       </div>
       <div style="display:grid; gap:18px; align-content:start">
@@ -790,7 +736,7 @@ var FIGUREN = {
   6: { name: "Jean-Luc", art: { de: "Deutsch · Koch aus Lyon", en: "German · chef from Lyon" }, text: { de: "Koch aus Lyon, seit vielen Jahren in Deutschland. Beim Essen wird er leidenschaftlich, sonst ist er gelassen.", en: "A chef from Lyon who has lived in Germany for many years. Passionate about food, relaxed about everything else." } },
   7: { name: "Alex", art: { de: "Deutsch · Gründer", en: "German · founder" }, text: { de: "Hat zwei Firmen gegründet. Eine davon ging gründlich schief, und darüber redet Alex offener als über die andere.", en: "Has founded two companies. One went badly wrong, and Alex talks about that one more openly than the other." } },
   8: { name: "Ravi", art: { de: "Englisch · Java-Entwickler", en: "English · Java developer" }, text: { de: "Java-Entwickler in Bengaluru, hält seit elf Jahren dasselbe Bankensystem am Laufen. Hat zu Frameworks Meinungen, und nur wenige davon sind begeistert.", en: "A Java developer in Bengaluru who has kept the same banking system running for eleven years. Has opinions about frameworks, and few of them are enthusiastic." } },
-  9: { name: { de: "Die KI", en: "The AI" }, art: { de: "Deutsch · ohne Rolle", en: "German · no role" }, text: { de: "Eine künstliche Intelligenz am Telefon, die daraus kein Geheimnis macht. Freundlich, klar, ohne Getue.", en: "An artificial intelligence on the phone that makes no secret of it. Friendly, clear, no fuss." } },
+  9: { name: { de: "Die KI", en: "The AI" }, art: { de: "Deutsch · ohne Rolle", en: "German · no role" }, text: { de: "Eine künstliche Intelligenz am Telefon, die daraus kein Geheimnis macht. Freundlich und klar.", en: "An artificial intelligence on the phone that makes no secret of it. Friendly and clear." } },
   0: { name: { de: "Herunterfahren", en: "Shut down" }, art: { de: "Keine Figur", en: "No character" }, text: { de: "Ist die Option eingeschaltet, fährt die 0 den Pi sauber herunter: drei fallende Töne, dann fünf Sekunden Frist. Wer in der Zeit auflegt, bricht ab. Die 0 ist der längste Weg auf der Scheibe und wird kaum aus Versehen gewählt.", en: "With the option switched on, 0 shuts the Pi down cleanly: three falling tones, then a five-second grace period. Hanging up in that time cancels it. 0 is the longest pull on the dial, so it is rarely dialled by accident." } }
 };
 var gewaehlt = null;
