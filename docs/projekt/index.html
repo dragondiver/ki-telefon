@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KI-Telefon</title>
+<meta name="description" content="KI-Telefon: ein Posttelefon FeTAp 611-2 mit Raspberry Pi und neun Gesprächsfiguren. AI Telephone: a 1970s German rotary phone with a Raspberry Pi and nine characters to talk to.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,300..900;1,62..125,400..700&family=Azeret+Mono:wght@400;500;600&display=swap">
+<script>(function(){var q=/[?&]lang=(de|en)\b/.exec(location.search),s=null;try{s=localStorage.getItem("ta-sprache")}catch(e){}if(s!=="de"&&s!=="en")s=null;var l=(navigator.languages&&navigator.languages[0])||navigator.language||"en";document.documentElement.setAttribute("data-sprache",q?q[1]:s||(/^de\b/i.test(l)?"de":"en"));})();</script>
+<style>
+/* Layout: lange Seite, Text links, Wählscheibe rechts im Kopf; danach breite Abschnitte wie Blätter aus einem Störungsbuch der Post. */
+:root {
+  --grund: #e7e5e0;          /* Postgrau, leicht warm */
+  --grund-2: #f3f2ee;        /* Karten */
+  --grund-3: #dcd9d2;
+  --tinte: #1e1916;
+  --tinte-2: #5a514a;
+  --orange: #d9531a;         /* Gehäuse FeTAp 611, orange */
+  --orange-2: #f08a52;
+  --auf-orange: #fff8f2;
+  --platine: #5b3220;        /* Platine, braun */
+  --kupfer: #a8682a;
+  --violett: #6a4fb0; --gelb: #d49a12; --gruen: #2e8a4e; --blau: #2f62b5; --rot: #c8352b; --weiss: #bdb7ae;
+  --linie: rgba(30,25,22,.14);
+  --linie-2: rgba(30,25,22,.28);
+  --schatten: 0 1px 0 rgba(255,255,255,.6) inset, 0 18px 40px -24px rgba(60,30,10,.45);
+  --f-titel: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-text: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "Azeret Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --rand: max(16px, env(safe-area-inset-left, 0px));
+  --rand-r: max(16px, env(safe-area-inset-right, 0px));
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --grund: #1c130e; --grund-2: #281b14; --grund-3: #33231a;
+    --tinte: #f1e8de; --tinte-2: #b6a596;
+    --orange: #ff7840; --orange-2: #ffa070; --auf-orange: #1c130e;
+    --platine: #3d2417; --kupfer: #d49a5c;
+    --violett: #a78bf0; --gelb: #f0c040; --gruen: #5cc47f; --blau: #7aa6f0; --rot: #f0705f; --weiss: #e9e2d8;
+    --linie: rgba(241,232,222,.13); --linie-2: rgba(241,232,222,.26);
+    --schatten: 0 1px 0 rgba(255,255,255,.05) inset, 0 20px 40px -24px rgba(0,0,0,.8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --grund: #1c130e; --grund-2: #281b14; --grund-3: #33231a;
+  --tinte: #f1e8de; --tinte-2: #b6a596;
+  --orange: #ff7840; --orange-2: #ffa070; --auf-orange: #1c130e;
+  --platine: #3d2417; --kupfer: #d49a5c;
+  --violett: #a78bf0; --gelb: #f0c040; --gruen: #5cc47f; --blau: #7aa6f0; --rot: #f0705f; --weiss: #e9e2d8;
+  --linie: rgba(241,232,222,.13); --linie-2: rgba(241,232,222,.26);
+  --schatten: 0 1px 0 rgba(255,255,255,.05) inset, 0 20px 40px -24px rgba(0,0,0,.8);
+  color-scheme: dark;
+}
+
+/* Sprachen */
+:root[data-sprache="de"] [lang="en"], :root[data-sprache="en"] [lang="de"] { display: none !important; }
+:root[data-sprache="de"] .sprachwahl [data-s="de"], :root[data-sprache="en"] .sprachwahl [data-s="en"] { background: var(--tinte); color: var(--grund); }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+main { overflow-x: clip; }
+body {
+  margin: 0; background: var(--grund); color: var(--tinte);
+  font: 400 1.0625rem/1.6 var(--f-text); font-variation-settings: "wdth" 96;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at 1px 1px, var(--linie) 1px, transparent 1.4px),
+    radial-gradient(1200px 700px at 88% -10%, color-mix(in srgb, var(--orange) 16%, transparent), transparent 70%);
+  background-size: 24px 24px, 100% 100%;
+  background-attachment: scroll, fixed;
+}
+a { color: inherit; text-decoration-color: var(--orange); text-underline-offset: .2em; }
+a:hover { color: var(--orange); }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; font-family: var(--f-titel); }
+h1 { font-size: clamp(2.4rem, 9vw, 6.6rem); line-height: .9; font-weight: 850; font-variation-settings: "wdth" 125; letter-spacing: -.02em; text-transform: uppercase; }
+h2 { font-size: clamp(1.7rem, 3.6vw, 2.6rem); line-height: 1.08; font-weight: 750; font-variation-settings: "wdth" 112; letter-spacing: -.01em; }
+h3 { font-size: 1.12rem; line-height: 1.25; font-weight: 700; font-variation-settings: "wdth" 104; }
+p { margin: 0; }
+.etikett { font: 500 .74rem/1.3 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--tinte-2); }
+.etikett b { color: var(--orange); font-weight: 600; }
+.satz { max-width: 62ch; color: var(--tinte); }
+.leise { color: var(--tinte-2); font-size: .92rem; }
+.mono { font-family: var(--f-mono); font-size: .86em; }
+.nur-schmal { display: none; }
+@media (max-width: 899px) { .nur-breit { display: none; } .nur-schmal { display: inline; } }
+
+.innen-rand { padding-left: var(--rand); padding-right: var(--rand-r); }
+.breite { max-width: 1180px; margin-inline: auto; }
+
+/* Kopfleiste */
+.kopf { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 14px); right: calc(env(safe-area-inset-right, 0px) + 14px); z-index: 20; display: flex; gap: 8px; }
+.sprachwahl { display: inline-flex; padding: 3px; border: 1px solid var(--linie-2); border-radius: 999px; background: color-mix(in srgb, var(--grund) 82%, transparent); backdrop-filter: blur(8px); cursor: pointer; font: 600 .72rem/1 var(--f-mono); color: var(--tinte); }
+.sprachwahl span { padding: 6px 9px; border-radius: 999px; }
+
+/* Navigation als Nummernkarte */
+.wahlkarte { position: fixed; left: calc(env(safe-area-inset-left, 0px) + 14px); top: 50%; transform: translateY(-50%); z-index: 15; display: flex; flex-direction: column; gap: 2px; font: 500 .68rem/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
+.wahlkarte a { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--tinte-2); padding: 5px 6px; border-radius: 4px; }
+.wahlkarte a i { font-style: normal; width: 1.4em; height: 1.4em; display: grid; place-items: center; border: 1px solid var(--linie-2); border-radius: 50%; font-size: .62rem; transition: background .25s, color .25s, border-color .25s; }
+.wahlkarte a span { opacity: 0; transform: translateX(-4px); transition: opacity .2s, transform .2s; white-space: nowrap; }
+.wahlkarte:hover a span, .wahlkarte a.aktiv span { opacity: 1; transform: none; }
+.wahlkarte a.aktiv i { background: var(--orange); border-color: var(--orange); color: var(--auf-orange); }
+@media (max-width: 1279px) { .wahlkarte { display: none; } }
+
+/* Auftakt */
+.auftakt { padding-block: clamp(56px, 9vw, 110px) 40px; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: clamp(24px, 5vw, 72px); align-items: start; }
+.auftakt > * { min-width: 0; }
+.auftakt .text { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; padding-top: 10px; }
+.auftakt h1 .zeile2 { display: block; color: var(--orange); }
+@media (min-width: 900px) { .auftakt h1 { font-size: clamp(2.4rem, 6vw, 4.7rem); } }
+.massreihe { display: flex; flex-wrap: wrap; gap: 8px; }
+.massreihe span { font: 400 .8rem/1 var(--f-mono); padding: 9px 11px; border: 1px solid var(--linie-2); border-radius: 3px; background: var(--grund-2); }
+.massreihe b { font-weight: 600; color: var(--orange); }
+.stand { display: flex; gap: 10px; align-items: baseline; font-size: .92rem; color: var(--tinte-2); max-width: 60ch; }
+.lampe { flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--gruen); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gruen) 25%, transparent); transform: translateY(-1px); }
+.lampe.gelb { background: var(--gelb); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gelb) 25%, transparent); }
+@media (max-width: 899px) { .auftakt { grid-template-columns: minmax(0, 1fr); } }
+.heute { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 56px); align-items: end; padding-bottom: clamp(56px, 8vw, 96px); }
+.heute > * { min-width: 0; }
+.heute figure { margin: 0; }
+.heute img { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: var(--schatten); }
+.heute-text { display: grid; gap: 12px; padding-bottom: 8px; }
+@media (max-width: 899px) { .heute { grid-template-columns: minmax(0, 1fr); } }
+
+/* Wählscheibe */
+.buehne { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; justify-items: center; }
+.scheibe-rahmen { position: relative; width: min(100%, 460px); aspect-ratio: 1; max-width: 100%; }
+#scheibe { width: 100%; height: 100%; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
+#scheibe .loch { cursor: grab; }
+#scheibe.zieht .loch { cursor: grabbing; }
+.impulse { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); display: flex; gap: 5px; }
+.impulse i { width: 8px; height: 8px; border-radius: 50%; background: var(--linie-2); transition: background .05s; }
+.impulse i.an { background: var(--orange); box-shadow: 0 0 10px var(--orange); }
+.wahl-hinweis { font: 500 .72rem/1.4 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--tinte-2); text-align: center; }
+.wahl-tasten { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.wahl-tasten button, .knopf { font: 600 .8rem/1 var(--f-mono); color: var(--tinte); background: var(--grund-2); border: 1px solid var(--linie-2); border-radius: 999px; padding: 9px 12px; cursor: pointer; transition: background .2s, color .2s, border-color .2s, transform .15s; }
+.wahl-tasten button { width: 2.4rem; padding: 9px 0; }
+.wahl-tasten button:hover, .knopf:hover { border-color: var(--orange); }
+.wahl-tasten button[aria-pressed="true"] { background: var(--orange); color: var(--auf-orange); border-color: var(--orange); }
+.knopf.haupt { background: var(--orange); color: var(--auf-orange); border-color: var(--orange); }
+.knopf.haupt:hover { background: var(--tinte); border-color: var(--tinte); color: var(--grund); }
+.knopf:active { transform: scale(.97); }
+.knopf[disabled] { opacity: .5; cursor: default; }
+.schalter { display: inline-flex; align-items: center; gap: 8px; font: 500 .74rem/1 var(--f-mono); color: var(--tinte-2); cursor: pointer; }
+.schalter input { accent-color: var(--orange); width: 1rem; height: 1rem; }
+
+.figur { width: min(100%, 460px); background: var(--grund-2); border: 1px solid var(--linie); border-radius: 6px; padding: 18px 20px 20px; box-shadow: var(--schatten); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 18px; position: relative; overflow: hidden; }
+.figur::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--orange); }
+.figur .ziffer { grid-row: span 3; font: 850 3.4rem/.9 var(--f-titel); font-variation-settings: "wdth" 125; color: var(--orange); min-width: 1.1em; }
+.figur h3 { font-size: 1.3rem; }
+.figur .art { font: 500 .72rem/1.4 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--tinte-2); }
+.figur p.beschr { grid-column: 2; font-size: .96rem; margin-top: 4px; }
+.figur.neu { animation: karte .5s cubic-bezier(.2,.8,.2,1); }
+@keyframes karte { from { transform: translateY(8px); opacity: .3; } to { transform: none; opacity: 1; } }
+
+/* Abschnitte */
+.abschnitt { padding-block: clamp(64px, 9vw, 120px); border-top: 1px solid var(--linie); position: relative; }
+.abschnitt-kopf { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 18px clamp(24px, 5vw, 64px); align-items: end; margin-bottom: clamp(32px, 5vw, 56px); }
+.abschnitt-kopf > * { min-width: 0; }
+.abschnitt-kopf .etikett { margin-bottom: 14px; }
+@media (max-width: 899px) { .abschnitt-kopf { grid-template-columns: minmax(0, 1fr); } }
+
+/* Anruf-Ablauf */
+.ablauf { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; counter-reset: schritt; position: relative; }
+.ablauf li { list-style: none; padding: 18px 16px 20px; border-left: 1px solid var(--linie-2); position: relative; transition: background .35s; min-width: 0; }
+.ablauf li:last-child { border-right: 1px solid var(--linie-2); }
+.ablauf li::before { counter-increment: schritt; content: counter(schritt); font: 850 2rem/1 var(--f-titel); font-variation-settings: "wdth" 125; color: var(--linie-2); display: block; margin-bottom: 10px; transition: color .3s; }
+.ablauf li .zustand { font: 600 .7rem/1 var(--f-mono); letter-spacing: .06em; color: var(--tinte-2); display: inline-block; padding: 4px 6px; border: 1px solid var(--linie-2); border-radius: 3px; margin-bottom: 10px; }
+.ablauf li h3 { margin-bottom: 6px; }
+.ablauf li p { font-size: .92rem; color: var(--tinte-2); }
+.ablauf li.jetzt { background: color-mix(in srgb, var(--orange) 11%, transparent); }
+.ablauf li.jetzt::before { color: var(--orange); }
+.ablauf li.jetzt .zustand { background: var(--orange); color: var(--auf-orange); border-color: var(--orange); }
+.ablauf { padding: 0; margin: 0; }
+@media (max-width: 899px) { .ablauf { grid-template-columns: minmax(0, 1fr); } .ablauf li { border-right: 1px solid var(--linie-2); border-bottom: 1px solid var(--linie-2); } .ablauf li:first-child { border-top: 1px solid var(--linie-2); } }
+.leitung { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; margin-top: 22px; }
+.leitung .anzeige { font: 500 .85rem/1.4 var(--f-mono); color: var(--tinte-2); min-height: 1.4em; flex: 1 1 260px; min-width: 0; }
+.leitung .anzeige q { color: var(--tinte); font-family: var(--f-text); font-style: italic; font-size: 1rem; }
+
+/* Werkzeuge */
+.werkzeuge { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 0; margin: 0; }
+.werkzeuge li { list-style: none; background: var(--grund-2); border: 1px solid var(--linie); border-radius: 6px; padding: 18px 18px 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.werkzeuge q { font: 500 1.08rem/1.35 var(--f-titel); font-variation-settings: "wdth" 100; quotes: "„" "“"; display: block; }
+:root[data-sprache="en"] .werkzeuge q { quotes: "“" "”"; }
+.werkzeuge p { font-size: .93rem; color: var(--tinte-2); }
+.werkzeuge .fn { font: 500 .7rem/1.5 var(--f-mono); color: var(--kupfer); word-break: break-word; }
+@media (max-width: 1023px) { .werkzeuge { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 639px) { .werkzeuge { grid-template-columns: minmax(0, 1fr); } }
+.dienst { margin-top: 18px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.dienst > div { border-top: 2px solid var(--tinte); padding-top: 12px; min-width: 0; }
+.dienst h3 { margin-bottom: 6px; }
+.dienst p { font-size: .95rem; color: var(--tinte-2); }
+@media (max-width: 639px) { .dienst { grid-template-columns: minmax(0, 1fr); } }
+
+/* Innenleben */
+.fotoreihe { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px; align-items: start; }
+.fotoreihe figure, .foto-einzel { margin: 0; min-width: 0; }
+.fotoreihe img, .foto-einzel img { width: 100%; height: auto; display: block; border-radius: 4px; background: var(--grund-3); }
+figcaption { font-size: .84rem; color: var(--tinte-2); margin-top: 8px; line-height: 1.45; }
+figcaption .quelle { display: block; font: 400 .68rem/1.5 var(--f-mono); margin-top: 3px; color: var(--tinte-2); opacity: .85; }
+@media (max-width: 899px) { .fotoreihe { grid-template-columns: 1fr 1fr; } .fotoreihe figure:first-child { grid-column: 1 / -1; } }
+.vorher { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(20px, 4vw, 48px); align-items: center; margin-bottom: clamp(40px, 6vw, 72px); }
+.vorher > * { min-width: 0; }
+.vorher .zwei { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; align-items: end; }
+@media (max-width: 899px) { .vorher { grid-template-columns: minmax(0, 1fr); } }
+
+.plan-rahmen { margin-top: clamp(40px, 6vw, 72px); background: var(--grund-2); border: 1px solid var(--linie); border-radius: 6px; padding: clamp(16px, 3vw, 28px); }
+.plan-kopf { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; align-items: baseline; margin-bottom: 14px; }
+.plan-scroll { overflow-x: auto; }
+#plan { width: 100%; min-width: 620px; height: auto; display: block; }
+#plan text { font-family: var(--f-mono); fill: var(--tinte); }
+#plan .klein { font-size: 10px; fill: var(--tinte-2); }
+#plan .kasten { fill: var(--grund); stroke: var(--linie-2); stroke-width: 1; }
+#plan .pi { fill: color-mix(in srgb, var(--gruen) 14%, var(--grund)); stroke: var(--gruen); }
+#plan .draht { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+#plan .geist { fill: none; stroke: var(--linie-2); stroke-width: 3; stroke-dasharray: 2 5; stroke-linecap: round; }
+#plan .pin { fill: var(--kupfer); }
+
+.teile { margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+.teile li { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 12px 0; border-bottom: 1px solid var(--linie); }
+.teile b { font-weight: 650; }
+.teile span { font-size: .9rem; color: var(--tinte-2); }
+@media (max-width: 639px) { .teile { grid-template-columns: minmax(0, 1fr); } }
+
+/* Klingel */
+.klingel { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
+.klingel > * { min-width: 0; }
+@media (max-width: 899px) { .klingel { grid-template-columns: minmax(0, 1fr); } }
+.wecker-bild { display: grid; justify-items: center; gap: 16px; }
+#wecker { width: min(100%, 320px); height: auto; overflow: visible; }
+#wecker .glocke { fill: url(#glanz); stroke: var(--tinte-2); stroke-width: 1.5; }
+#wecker .koeppel { transform-origin: 160px 250px; }
+#wecker.klingelt .koeppel { animation: schlag .04s linear infinite alternate; }
+#wecker.klingelt .glocke-g { animation: zittern .04s linear infinite alternate; }
+@keyframes schlag { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+@keyframes zittern { from { transform: translateX(-.8px); } to { transform: translateX(.8px); } }
+#wecker .welle { fill: none; stroke: var(--orange); stroke-width: 2; opacity: 0; }
+#wecker.klingelt .welle { animation: welle .6s ease-out infinite; }
+#wecker.klingelt .welle.w2 { animation-delay: .3s; }
+@keyframes welle { from { opacity: .8; transform: scale(.9); } to { opacity: 0; transform: scale(1.25); } }
+#wecker .welle { transform-origin: 160px 150px; }
+.werte { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 24px 0; border-top: 1px solid var(--linie-2); border-bottom: 1px solid var(--linie-2); }
+.werte div { padding: 14px 12px 12px 0; min-width: 0; }
+.werte div + div { padding-left: 12px; border-left: 1px solid var(--linie); }
+.werte b { display: block; font: 800 1.6rem/1 var(--f-titel); font-variation-settings: "wdth" 115; color: var(--orange); font-variant-numeric: tabular-nums; }
+.werte span { font: 500 .68rem/1.35 var(--f-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--tinte-2); }
+@media (max-width: 639px) { .werte { grid-template-columns: repeat(2, minmax(0, 1fr)); } .werte div:nth-child(3) { border-left: 0; padding-left: 0; } .werte div:nth-child(n+3) { border-top: 1px solid var(--linie); } }
+.mess-rahmen { margin-top: 10px; overflow-x: auto; }
+#messung { width: 100%; min-width: 460px; height: auto; display: block; }
+#messung text { font-family: var(--f-mono); font-size: 11px; fill: var(--tinte-2); }
+#messung .achse { stroke: var(--linie-2); stroke-width: 1; }
+#messung .gitter { stroke: var(--linie); stroke-width: 1; }
+#messung .punkt { fill: var(--orange); }
+#messung .punkt.leer { fill: var(--grund); stroke: var(--orange); stroke-width: 1.5; }
+
+/* Störungsbuch */
+.buch { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 4vw, 56px); }
+.buch li { list-style: none; display: grid; grid-template-columns: 5.6rem minmax(0, 1fr); gap: 4px 16px; padding: 18px 0; border-bottom: 1px solid var(--linie); }
+.buch time { font: 600 .74rem/1.5 var(--f-mono); color: var(--orange); padding-top: 3px; }
+.buch h3 { margin-bottom: 4px; }
+.buch p { font-size: .94rem; color: var(--tinte-2); grid-column: 2; }
+@media (max-width: 899px) { .buch { grid-template-columns: minmax(0, 1fr); } }
+
+/* Modelle */
+.tabelle { overflow-x: auto; border: 1px solid var(--linie); border-radius: 6px; background: var(--grund-2); }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: .92rem; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--linie); vertical-align: top; }
+th { font: 600 .7rem/1.3 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--tinte-2); }
+tr:last-child td { border-bottom: 0; }
+td code { font: 500 .8rem/1.4 var(--f-mono); color: var(--kupfer); white-space: nowrap; }
+.grundsatz { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
+.grundsatz > div { border-top: 2px solid var(--tinte); padding-top: 12px; min-width: 0; }
+.grundsatz h3 { margin-bottom: 6px; }
+.grundsatz p { font-size: .94rem; color: var(--tinte-2); }
+@media (max-width: 899px) { .grundsatz { grid-template-columns: minmax(0, 1fr); } }
+
+/* Arbeitsweise und Kosten */
+.zwei-spalten { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); }
+.zwei-spalten > * { min-width: 0; }
+@media (max-width: 899px) { .zwei-spalten { grid-template-columns: minmax(0, 1fr); } }
+.chronik { margin: 0; padding: 0; border-left: 2px solid var(--orange); }
+.chronik li { list-style: none; padding: 0 0 18px 18px; position: relative; }
+.chronik li::before { content: ""; position: absolute; left: -6px; top: .45em; width: 10px; height: 10px; border-radius: 50%; background: var(--grund); border: 2px solid var(--orange); }
+.chronik time { font: 600 .72rem/1.4 var(--f-mono); color: var(--tinte-2); display: block; }
+.befehl { margin-top: 10px; font: 500 .8rem/1.5 var(--f-mono); background: var(--platine); color: #f6e7d6; padding: 10px 12px; border-radius: 4px; overflow-x: auto; white-space: pre; }
+.entwurf-hinweis { border: 1.5px dashed var(--orange); border-radius: 6px; padding: 14px 16px; font-size: .93rem; color: var(--tinte-2); background: color-mix(in srgb, var(--orange) 6%, transparent); }
+.entwurf-hinweis b { color: var(--orange); }
+
+.schluss { padding-block: 40px 56px; border-top: 1px solid var(--linie); display: grid; gap: 18px; }
+.nachweis { margin: 0; padding: 0; display: grid; gap: 8px; font-size: .84rem; color: var(--tinte-2); max-width: 90ch; }
+.nachweis li { list-style: none; }
+
+/* Auftritt beim Laden: sichtbar im Ruhezustand, nur die Bewegung wird gespielt */
+@media (prefers-reduced-motion: no-preference) {
+  .auftakt .text > * { animation: hoch .8s cubic-bezier(.2,.8,.2,1) both; }
+  .auftakt .text > *:nth-child(2) { animation-delay: .08s; }
+  .auftakt .text > *:nth-child(3) { animation-delay: .16s; }
+  .auftakt .text > *:nth-child(4) { animation-delay: .24s; }
+  .auftakt .text > *:nth-child(5) { animation-delay: .32s; }
+  .buehne { animation: dreh-rein 1.1s cubic-bezier(.2,.8,.2,1) both .1s; }
+}
+@keyframes hoch { from { transform: translateY(14px); } to { transform: none; } }
+@keyframes dreh-rein { from { transform: rotate(-24deg) scale(.94); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } #wecker.klingelt .koeppel, #wecker.klingelt .glocke-g, #wecker.klingelt .welle { animation: none; } }
+</style>
+</head>
+<body>
+
+<div class="kopf">
+  <button class="sprachwahl" type="button" id="sprachwahl"><span data-s="de">DE</span><span data-s="en">EN</span></button>
+</div>
+
+<nav class="wahlkarte" aria-label="Abschnitte">
+  <a href="#start"><i>1</i><span>Start</span></a>
+  <a href="#anruf"><i>2</i><span><b lang="de">Ein Anruf</b><b lang="en">A call</b></span></a>
+  <a href="#werkzeuge"><i>3</i><span><b lang="de">Werkzeuge</b><b lang="en">Tools</b></span></a>
+  <a href="#innen"><i>4</i><span><b lang="de">Innenleben</b><b lang="en">Inside</b></span></a>
+  <a href="#klingel"><i>5</i><span><b lang="de">Klingel</b><b lang="en">Bell</b></span></a>
+  <a href="#stoerungen"><i>6</i><span><b lang="de">Störungen</b><b lang="en">Faults</b></span></a>
+  <a href="#modelle"><i>7</i><span><b lang="de">Modelle</b><b lang="en">Models</b></span></a>
+  <a href="#arbeitsweise"><i>8</i><span><b lang="de">Arbeitsweise</b><b lang="en">Method</b></span></a>
+</nav>
+
+<main>
+<!-- 1 · Auftakt -->
+<section class="innen-rand" id="start">
+  <div class="breite auftakt">
+    <div class="text">
+      <p class="etikett"><span lang="de">Bauprojekt · Stand 8. November 2026</span><span lang="en">Build log · as of 8 November 2026</span></p>
+      <h1><span lang="de">KI-<span class="zeile2">Telefon</span></span><span lang="en">AI <span class="zeile2">Telephone</span></span></h1>
+      <p class="satz"><span lang="de">Ich habe ein oranges Posttelefon FeTAp 611-2 aus den Siebzigern umgebaut. Wer den Hörer abhebt, hört das Freizeichen, wählt eine Ziffer und hat eine von neun Figuren am Apparat. Die Figuren spielen Musik ab, setzen Dinge auf unsere Einkaufsliste, schlagen Rezepte vor und merken sich, was man ihnen sagt. Im Gehäuse steckt ein Raspberry Pi 5. Gabelschalter, Wählscheibe, Hörer und Klingel sind die Originalteile. Die Wählscheibe <span class="nur-breit">rechts</span><span class="nur-schmal">unten</span> lässt sich mit der Maus oder dem Finger drehen.</span><span lang="en">I converted an orange 1970s German post office telephone, the FeTAp 611-2. Lift the handset, hear the dial tone, dial a digit, and one of nine characters answers. They play music, put things on our shopping list, suggest recipes and remember what you tell them. A Raspberry Pi 5 sits inside the case. The hook switch, rotary dial, handset and bell are the original parts. You can turn the dial <span class="nur-breit">on the right</span><span class="nur-schmal">below</span> with a mouse or a finger.</span></p>
+      <div class="massreihe" aria-label="Kennzahlen">
+        <span><b>9</b> <i lang="de">Figuren</i><i lang="en">characters</i></span>
+        <span><b>17</b> <i lang="de">Werkzeuge</i><i lang="en">tools</i></span>
+        <span><b>425</b> Hz <i lang="de">Freizeichen</i><i lang="en">dial tone</i></span>
+        <span><b>25</b> Hz <i lang="de">Klingel</i><i lang="en">ringing</i></span>
+        <span><b>24</b> kHz Audio</span>
+      </div>
+      <p class="stand"><i class="lampe gelb" aria-hidden="true"></i><span><span lang="de">Läuft seit dem 8. Juni 2026 bei uns im Haus. Offen ist ein Wackelkontakt im Hörerkabel, den ich im Oktober nur provisorisch behoben habe.</span><span lang="en">In use at home since 8 June 2026. Still open: a loose contact in the handset cord, which I only patched up in October.</span></span></p>
+    </div>
+
+    <div class="buehne" id="figuren">
+      <div class="scheibe-rahmen">
+        <svg id="scheibe" viewBox="0 0 400 400" role="img" aria-labelledby="scheibe-titel">
+          <title id="scheibe-titel">Wählscheibe</title>
+          <defs>
+            <radialGradient id="gehaeuse" cx="40%" cy="35%" r="75%">
+              <stop offset="0" style="stop-color:var(--orange-2)"/>
+              <stop offset=".7" style="stop-color:var(--orange)"/>
+              <stop offset="1" style="stop-color:color-mix(in srgb, var(--orange) 70%, #000)"/>
+            </radialGradient>
+            <radialGradient id="ring" cx="50%" cy="45%" r="60%">
+              <stop offset="0" stop-color="#5d5a56"/>
+              <stop offset="1" stop-color="#3a3835"/>
+            </radialGradient>
+            <linearGradient id="glas" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+              <stop offset=".5" stop-color="#ffffff" stop-opacity=".12"/>
+              <stop offset="1" stop-color="#ffffff" stop-opacity=".35"/>
+            </linearGradient>
+            <linearGradient id="metall" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f4f4f2"/><stop offset=".5" stop-color="#a9a9a6"/><stop offset="1" stop-color="#e2e2df"/>
+            </linearGradient>
+            <filter id="weich" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#3a1a08" flood-opacity=".35"/></filter>
+          </defs>
+          <circle cx="200" cy="200" r="196" fill="url(#gehaeuse)"/>
+          <circle cx="200" cy="200" r="174" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="2"/>
+          <!-- Zahlenring -->
+          <circle cx="200" cy="200" r="168" fill="url(#ring)"/>
+          <g id="ziffern" font-family="Archivo, Arial, sans-serif" font-weight="700" font-size="25" text-anchor="middle" fill="#f6f3ec"></g>
+          <!-- Fingerlochscheibe, dreht sich -->
+          <g id="drehteil" filter="url(#weich)">
+            <path id="lochscheibe" fill="url(#glas)" stroke="#ffffff" stroke-opacity=".7" stroke-width="1.2" fill-rule="evenodd"/>
+            <g id="loecher"></g>
+          </g>
+          <!-- Mitte -->
+          <circle cx="200" cy="200" r="66" fill="#4f4c48" stroke="#34322f" stroke-width="2"/>
+          <rect x="150" y="186" width="100" height="28" rx="2" fill="#fff" stroke="#d5cfc4"/>
+          <text x="200" y="179" text-anchor="middle" font-family="Azeret Mono, monospace" font-size="9.5" letter-spacing="2" fill="#e4ded4" id="mitte-oben">FIGUR</text>
+          <text x="200" y="205" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="13" fill="#2a221d" id="mitte-name">WÄHLEN</text>
+          <text x="200" y="230" text-anchor="middle" font-family="Azeret Mono, monospace" font-size="9.5" letter-spacing="2" fill="#e4ded4" id="mitte-unten">1 – 9 · 0</text>
+          <!-- Fingeranschlag -->
+          <g id="anschlag" transform="rotate(30 200 200)">
+            <path d="M352 196 L392 189 Q398 200 392 211 L352 204 Z" fill="url(#metall)" stroke="#6f6f6c" stroke-width="1"/>
+          </g>
+        </svg>
+        <div class="impulse" id="impulse" aria-hidden="true"></div>
+      </div>
+      <p class="wahl-hinweis" id="wahl-hinweis"><span lang="de">Finger ins Loch, bis zum Anschlag drehen, loslassen</span><span lang="en">Finger in a hole, turn to the stop, let go</span></p>
+      <div class="wahl-tasten" id="wahl-tasten" role="group" aria-label="Ziffer wählen"></div>
+      <label class="schalter"><input type="checkbox" id="ton-impulse"> <span lang="de">Impulse hörbar</span><span lang="en">Make pulses audible</span></label>
+      <article class="figur" id="figur" aria-live="polite"></article>
+    </div>
+  </div>
+  <div class="breite heute">
+    <figure><img src="bilder/telefon-heute.jpg" alt="" data-alt-de="Oranges Tischtelefon mit Wählscheibe, schwarze Fingerlöcher mit weißen Ziffern, im Mittelfeld die Notrufnummern 112 und 110" data-alt-en="Orange desk telephone with rotary dial, black finger holes with white digits, emergency numbers 112 and 110 on the centre card" width="1200" height="1130"></figure>
+    <div class="heute-text">
+      <p class="etikett"><span lang="de">Mein Telefon, November 2026</span><span lang="en">My phone, November 2026</span></p>
+      <p class="satz"><span lang="de">Von außen ist nichts umgebaut. Die Wählscheibe oben auf dieser Seite habe ich nach diesem Gerät gezeichnet: schwarze Fingerlöcher, weiße Ziffern, Anschlag bei vier Uhr. Auf dem Nummernschild stand unsere alte Rufnummer, die habe ich auf dem Foto entfernt.</span><span lang="en">Nothing has changed on the outside. I drew the dial at the top of this page after this phone: black finger holes, white digits, the finger stop at four o'clock. The number card showed our old phone number, which I removed from the photo.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Ein Anruf -->
+<section class="abschnitt innen-rand" id="anruf">
+  <div class="breite">
+    <div class="abschnitt-kopf">
+      <div>
+        <p class="etikett"><span lang="de">Ein Anruf</span><span lang="en">A call</span></p>
+        <h2><span lang="de">Abheben, wählen, reden. Dazwischen passiert eine Menge.</span><span lang="en">Lift, dial, talk. A lot happens in between.</span></h2>
+      </div>
+      <p class="satz"><span lang="de">Das Programm führt jeden Anruf als Zustandsmaschine. Den Freiton nutze ich als Wartezeit: Während es im Hörer tutet, baut der Pi schon die Verbindung zur Realtime-API von OpenAI auf. Das Mikrofon gebe ich erst danach frei, sonst würde die KI den Freiton mithören.</span><span lang="en">The program runs each call as a state machine. I use the ringback tone as waiting time: while the handset beeps, the Pi is already opening the connection to OpenAI's Realtime API. The microphone only opens after that, otherwise the AI would hear the ringback tone too.</span></p>
+    </div>
+    <ol class="ablauf" id="ablauf">
+      <li data-z="idle"><span class="zustand">idle → dialing</span><h3><span lang="de">Hörer ab</span><span lang="en">Handset up</span></h3><p><span lang="de">Der Gabelschalter hängt an GPIO 5, entprellt mit 200 ms. Im Hörer liegt das Freizeichen mit 425 Hz.</span><span lang="en">The hook switch is on GPIO 5, debounced at 200 ms. The handset plays the 425 Hz dial tone.</span></p></li>
+      <li data-z="dialing"><span class="zustand">dialing</span><h3><span lang="de">Wählen</span><span lang="en">Dialling</span></h3><p><span lang="de">Die Wählscheibe an GPIO 26 schickt beim Zurücklaufen Impulse, rund 100 ms auseinander. Was schneller als 80 ms kommt, verwirft der Code als Prellen.</span><span lang="en">On its way back the dial on GPIO 26 sends pulses about 100 ms apart. Anything faster than 80 ms is discarded as contact bounce.</span></p></li>
+      <li data-z="ringback"><span class="zustand">ringback</span><h3><span lang="de">Freiton</span><span lang="en">Ringback</span></h3><p><span lang="de">Ein Ton, eine Pause. In dieser Zeit steht die Sitzung mit Rolle, Stimme und Werkzeugen.</span><span lang="en">One tone, one pause. During that time the session is set up with character, voice and tools.</span></p></li>
+      <li data-z="in_call"><span class="zustand">in_call</span><h3><span lang="de">Gespräch</span><span lang="en">Conversation</span></h3><p><span lang="de">Audio läuft als PCM16 mono mit 24 kHz in beide Richtungen, mit 250 ms Puffer. Wer dazwischenredet, unterbricht die Figur.</span><span lang="en">Audio flows as 24 kHz mono PCM16 in both directions, with a 250 ms buffer. Talking over the character interrupts it.</span></p></li>
+      <li data-z="aufgelegt"><span class="zustand">→ idle</span><h3><span lang="de">Auflegen</span><span lang="en">Hang up</span></h3><p><span lang="de">Auflegen beendet in jeder Phase. Danach meldet das Telefon die Anrufe des Tages an Home Assistant.</span><span lang="en">Hanging up ends the call in any phase. Afterwards the phone reports the day's call count to Home Assistant.</span></p></li>
+    </ol>
+    <div class="leitung">
+      <button class="knopf haupt" id="anruf-knopf" type="button"><span lang="de">Hörer abheben (mit Ton)</span><span lang="en">Lift handset (with sound)</span></button>
+      <p class="anzeige" id="anruf-anzeige"><span lang="de">Spielt den ersten Anruf vom 8. Juni nach, mit Ziffer 1.</span><span lang="en">Replays the first call from 8 June, dialling 1.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · Werkzeuge -->
+<section class="abschnitt innen-rand" id="werkzeuge">
+  <div class="breite">
+    <div class="abschnitt-kopf">
+      <div>
+        <p class="etikett"><span lang="de">Werkzeuge</span><span lang="en">Tools</span></p>
+        <h2><span lang="de">Die Figuren reden nicht nur. Sie erledigen auch etwas.</span><span lang="en">The characters do more than talk. They get things done.</span></h2>
+      </div>
+      <p class="satz"><span lang="de">Das Sprachmodell erkennt im Gespräch, was gewünscht ist, und ruft eines von 17 Werkzeugen auf. Ausgeführt wird der Aufruf von meinem Python-Code. Kurze Dinge passieren sofort, längere Aufgaben gehen in eine Warteschlange.</span><span lang="en">During the conversation the language model works out what is wanted and calls one of 17 tools. My Python code carries out the call. Short things happen right away, longer jobs go into a queue.</span></p>
+    </div>
+    <ul class="werkzeuge">
+      <li>
+        <p class="etikett"><span lang="de">Musik</span><span lang="en">Music</span></p>
+        <q><span lang="de">Spiel was von Queen.</span><span lang="en">Play something by Queen.</span></q>
+        <p><span lang="de">Startet Spotify auf unserem Radio oder der Stereoanlage. Wir haben zwei Spotify-Konten; die Figur fragt beim Abheben, wer dran ist. Spotifys eigene Mixe wie die Daylist sind seit November 2024 für fremde Apps gesperrt, das sagt die Figur dann auch.</span><span lang="en">Starts Spotify on our radio or the stereo. We have two Spotify accounts, so the character asks who is calling. Spotify's own mixes such as the daylist have been closed to third-party apps since November 2024, and the character says so.</span></p>
+        <span class="fn">spotify_play · spotify_now_playing</span>
+      </li>
+      <li>
+        <p class="etikett"><span lang="de">Einkaufsliste</span><span lang="en">Shopping list</span></p>
+        <q><span lang="de">Brötchen auf die Einkaufsliste, sechs Stück.</span><span lang="en">Bread rolls on the shopping list, six of them.</span></q>
+        <p><span lang="de">Landet sofort in unserer Haushalts-App, die ich ebenfalls selbst geschrieben habe.</span><span lang="en">Goes straight into our household app, which I also wrote myself.</span></p>
+        <span class="fn">add_shopping_item</span>
+      </li>
+      <li>
+        <p class="etikett"><span lang="de">Rezepte</span><span lang="en">Recipes</span></p>
+        <q><span lang="de">Schlag mir was für Pasta mit Spinat vor.</span><span lang="en">Suggest something with pasta and spinach.</span></q>
+        <p><span lang="de">Claude schreibt ein vollständiges Rezept, die Figur liest eine Zusammenfassung vor. „Mit Knoblauch“ ändert es, „Ja, speichern“ legt es in der Haushalts-App ab.</span><span lang="en">Claude writes a complete recipe and the character reads out a summary. “With garlic” changes it, “Yes, save it” files it in the household app.</span></p>
+        <span class="fn">suggest_recipe · modify_recipe · confirm_recipe</span>
+      </li>
+      <li>
+        <p class="etikett"><span lang="de">Wetter und Websuche</span><span lang="en">Weather and web search</span></p>
+        <q><span lang="de">Regnet es morgen bei uns?</span><span lang="en">Will it rain here tomorrow?</span></q>
+        <p><span lang="de">Das Wetter kommt von Open-Meteo, ohne Schlüssel. Für alles andere gibt es eine Websuche über Claude; vorher sagt die Figur kurz „Moment“. Standard sind höchstens 50 Suchen am Tag.</span><span lang="en">Weather comes from Open-Meteo, no key needed. For everything else there is a web search through Claude, and the character says “one moment” first. By default it allows at most 50 searches a day.</span></p>
+        <span class="fn">get_weather · web_suche</span>
+      </li>
+      <li>
+        <p class="etikett"><span lang="de">Haushalts-Gedächtnis</span><span lang="en">Household memory</span></p>
+        <q><span lang="de">Merk dir für den Italienurlaub: Adapter einpacken.</span><span lang="en">For the Italy trip, remember: pack the adapter.</span></q>
+        <p><span lang="de">Notizen unter einem Thema, die jede Figur später vorlesen oder löschen kann. Ob ein neues Thema zu einem alten gehört, entscheidet ein kleines Modell; gespeichert wird in SQLite.</span><span lang="en">Notes filed under a topic that any character can read out or delete later. A small model decides whether a new topic belongs to an existing one; the notes are stored in SQLite.</span></p>
+        <span class="fn">merke · erinnere · vergiss</span>
+      </li>
+      <li>
+        <p class="etikett"><span lang="de">Aufgaben für später</span><span lang="en">Jobs for later</span></p>
+        <q><span lang="de">Finde bis heute Abend heraus, wann der Wertstoffhof offen hat, und ruf mich zurück.</span><span lang="en">Find out by tonight when the recycling centre is open and call me back.</span></q>
+        <p><span lang="de">Die Aufgabe kommt in eine Warteschlange, mein Haus-Agent arbeitet sie ab. Ist das Ergebnis da, klingelt das Telefon, und eine Figur liest es vor. Alternativ kommt es per Mail.</span><span lang="en">The job goes into a queue and my house agent works through it. When the result is ready, the phone rings and a character reads it out. It can also arrive by email.</span></p>
+        <span class="fn">delegate_task · zustellung_aendern</span>
+      </li>
+      <li>
+        <p class="etikett"><span lang="de">Freisprechen</span><span lang="en">Speakerphone</span></p>
+        <q><span lang="de">Schalte auf laut.</span><span lang="en">Put it on speaker.</span></q>
+        <p><span lang="de">Das Gespräch wandert auf Elektra, mein Sprachgerät im Haus. Die 1 auf der Wählscheibe schaltet im Gespräch ebenfalls hin und her. Auflegen beendet immer.</span><span lang="en">The conversation moves over to Elektra, my voice device in the house. Dialling 1 during a call also switches back and forth. Hanging up always ends it.</span></p>
+        <span class="fn">freisprechen · hoerer_zurueck</span>
+      </li>
+      <li>
+        <p class="etikett"><span lang="de">Französischkurs</span><span lang="en">French course</span></p>
+        <q><span lang="de">Bonjour Camille !</span><span lang="en">Bonjour Camille !</span></q>
+        <p><span lang="de">Unter der 3 meldet sich Camille. Sie notiert Fehler, führt den Lernstand in einer eigenen Datenbank und erzählt vom Wetter in Rennes und den Nachrichten des Tages.</span><span lang="en">Dial 3 for Camille. She notes mistakes, keeps track of progress in a separate database and talks about the weather in Rennes and the day's news.</span></p>
+        <span class="fn">note_error · get_news_fr · get_weather</span>
+      </li>
+      <li>
+        <p class="etikett"><span lang="de">Das Telefon ruft an</span><span lang="en">The phone calls you</span></p>
+        <q><span lang="de">(Das Telefon klingelt von selbst.)</span><span lang="en">(The phone rings by itself.)</span></q>
+        <p><span lang="de">Ist der automatische Anruf eingeschaltet, klingelt das Telefon nach einer Ruhezeit, und beim Abheben ist eine zufällige Figur dran. Ohne Wählen.</span><span lang="en">With automatic calling switched on, the phone rings after a quiet period and a random character is on the line when you pick up. No dialling needed.</span></p>
+        <span class="fn">KITELEFON_AUTOCALL_DELAY_S</span>
+      </li>
+    </ul>
+    <div class="dienst">
+      <div>
+        <h3><span lang="de">Ein Gedächtnis pro Figur</span><span lang="en">One memory per character</span></h3>
+        <p><span lang="de">Nach dem Auflegen kann Claude aus dem Gespräch herausziehen, was sich die Figur merken soll: bis zu acht Fakten, die bleiben, und das letzte Gespräch, das nach 14 Tagen verfällt. Was Hein weiß, weiß Astrid nicht. Eine gemeinsame Ablage wäre praktischer, aber dann wären es keine verschiedenen Leute mehr.</span><span lang="en">After hanging up, Claude can pick out what the character should remember: up to eight facts that stay, plus the last conversation, which expires after 14 days. What Hein knows, Astrid does not. A shared store would be handier, but then they would no longer be different people.</span></p>
+      </div>
+      <div>
+        <h3><span lang="de">Dieselben Werkzeuge für Elektra</span><span lang="en">The same tools for Elektra</span></h3>
+        <p><span lang="de">Elektra ist mein Sprachassistent auf einem zweiten Gerät und bald auch auf dem <a href="https://dragondiver.github.io/kuechen-display/projekt/">Küchen-Display</a>. Sie nutzt die Werkzeuge des Telefons über einen kleinen HTTP-Dienst. So liegen Spotify-Anmeldung und Schlüssel nur an einer Stelle.</span><span lang="en">Elektra is my voice assistant on a second device and soon on the <a href="https://dragondiver.github.io/kuechen-display/projekt/">kitchen display</a> as well. She uses the phone's tools through a small HTTP service, so the Spotify login and the keys live in one place only.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · Innenleben -->
+<section class="abschnitt innen-rand" id="innen">
+  <div class="breite">
+    <div class="abschnitt-kopf">
+      <div>
+        <p class="etikett"><span lang="de">Innenleben</span><span lang="en">Inside</span></p>
+        <h2><span lang="de">Die Mechanik bleibt, die Amtsleitung geht.</span><span lang="en">The mechanics stay, the phone line goes.</span></h2>
+      </div>
+      <p class="satz"><span lang="de">Der FeTAp 611 war das Standardtelefon der Bundespost; man mietete es, statt es zu kaufen. Gebaut wurde er von mehreren Firmen, meiner stammt von Hagenuk. Für den Umbau habe ich den Übertrager und einen Kondensatorblock ausgelötet. Sie gehören zur Telefonleitung, die ich nicht mehr brauche, und machen Platz für den Pi.</span><span lang="en">The FeTAp 611 was the standard telephone of the German Bundespost; people rented it rather than bought it. Several companies built it, and mine was made by Hagenuk. For the conversion I desoldered the transformer and a capacitor block. They belong to the phone line, which I no longer need, and removing them makes room for the Pi.</span></p>
+    </div>
+
+    <div class="vorher">
+      <div class="zwei">
+        <figure class="foto-einzel"><img src="bilder/commons-fetap-611-2.jpg" alt="" data-alt-de="Grünes Telefon FeTAp 611-2 mit Wählscheibe auf weißem Grund" data-alt-en="Green FeTAp 611-2 telephone with rotary dial on a white background" loading="lazy" width="1100" height="733"><figcaption><span lang="de">Ein FeTAp 611-2 im Originalzustand, hier in Grün.</span><span lang="en">A FeTAp 611-2 in original condition, here in green.</span><span class="quelle">Foto: Felix Winkelnkemper, <a href="https://commons.wikimedia.org/wiki/File:Post_FeTAp_611-2.jpg">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.de">CC BY-SA 4.0</a>, verkleinert</span></figcaption></figure>
+        <figure class="foto-einzel"><img src="bilder/commons-fetap-innen.jpg" alt="" data-alt-de="Geöffnetes FeTAp 611-2 von oben: Platine, Übertrager, Glocke und Wählscheibe im hellen Gehäuse" data-alt-en="Open FeTAp 611-2 from above: circuit board, transformer, bell and rotary dial in a light housing" loading="lazy" width="865" height="1100"><figcaption><span lang="de">Ein unveränderter 611-2 von innen, oben die Platine mit dem Übertrager.</span><span lang="en">An unmodified 611-2 from the inside, with the transformer on the board at the top.</span><span class="quelle">Foto: Friedrich Haag, <a href="https://commons.wikimedia.org/wiki/File:003_2018_07_18_Telefone.jpg">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.de">CC BY-SA 4.0</a>, verkleinert</span></figcaption></figure>
+      </div>
+      <div>
+        <p class="satz"><span lang="de">Vom Original nutze ich fünf Dinge: das Gehäuse, den Gabelschalter, den Nummernschalter (so heißt die Wählscheibe bei der Post), den Hörer mit seinem Kohlemikrofon und den Wecker. Die Hörerkapseln gehen über zwei 3,5-mm-Klinken an eine USB-Soundkarte, Gabel und Wählscheibe direkt an die GPIO-Pins des Pi. Für die Klingel brauche ich eine höhere Spannung, dazu weiter unten mehr.</span><span lang="en">I use five things from the original: the case, the hook switch, the number switch (the post office's name for the rotary dial), the handset with its carbon microphone, and the ringer. The handset capsules connect through two 3.5 mm jacks to a USB sound card; hook switch and dial go straight to the Pi's GPIO pins. The bell needs a higher voltage, more on that below.</span></p>
+      </div>
+    </div>
+
+    <div class="fotoreihe">
+      <figure><img src="bilder/umbau-offen.jpg" alt="" data-alt-de="Orangefarbenes Telefon geöffnet auf dem Schreibtisch, Wählscheibe hochgeklappt, Glocke und Platine sichtbar, daneben die Gehäusehaube" data-alt-en="Orange telephone opened on the desk, dial lifted, bell and circuit board visible, the cover next to it" loading="lazy" width="430" height="505"><figcaption><span lang="de">Mein Telefon offen auf dem Schreibtisch, Juni 2026.</span><span lang="en">My phone open on the desk, June 2026.</span></figcaption></figure>
+      <figure><img src="bilder/platine-draehte.jpg" alt="" data-alt-de="Braune Platinenunterseite mit Aufschrift Hagenuk, fünf farbige Drähte an Lötpunkten" data-alt-en="Brown underside of the circuit board marked Hagenuk, five coloured wires at solder points" loading="lazy" width="640" height="480"><figcaption><span lang="de">Platinenunterseite mit den neuen Drähten zu Gabel, Wählscheibe und Hörer.</span><span lang="en">Underside of the board with the new wires to hook switch, dial and handset.</span></figcaption></figure>
+      <figure><img src="bilder/pi-im-telefon.jpg" alt="" data-alt-de="Raspberry Pi 5 mit Kühler, Steckbrücken führen zur orangefarbenen Telefonschale" data-alt-en="Raspberry Pi 5 with cooler, jumper wires leading to the orange phone shell" loading="lazy" width="480" height="640"><figcaption><span lang="de">Der Pi 5 mit Active Cooler, die Kabel führen zur Telefonplatine.</span><span lang="en">The Pi 5 with Active Cooler, cables running to the phone's board.</span></figcaption></figure>
+    </div>
+
+    <div class="plan-rahmen">
+      <div class="plan-kopf">
+        <h3><span lang="de">Verkabelung</span><span lang="en">Wiring</span></h3>
+        <p class="etikett"><span lang="de">GPIO-Nummern nach BCM · Drahtfarben wie im Telefon</span><span lang="en">GPIO numbers in BCM · wire colours as in the phone</span></p>
+      </div>
+      <div class="plan-scroll">
+        <svg id="plan" viewBox="0 0 760 330" role="img" aria-labelledby="plan-titel">
+          <title id="plan-titel">Verkabelung zwischen Raspberry Pi 5, Telefon, USB-Soundkarte und Klingel</title>
+          <!-- Pi -->
+          <rect class="kasten pi" x="20" y="20" width="170" height="290" rx="6"/>
+          <text x="36" y="46" font-size="13" font-weight="600">Raspberry Pi 5</text>
+          <text class="klein" x="36" y="62">4 GB · Active Cooler</text>
+          <g id="pins"></g>
+          <!-- Ziele -->
+          <rect class="kasten" x="560" y="30" width="180" height="44" rx="4"/>
+          <text x="574" y="50" font-size="12" font-weight="600" data-de="Gabelschalter" data-en="Hook switch">Gabelschalter</text>
+          <text class="klein" x="574" y="64" data-de="Kontakt GU, gegen Masse" data-en="contact GU, to ground">Kontakt GU, gegen Masse</text>
+          <rect class="kasten" x="560" y="86" width="180" height="44" rx="4"/>
+          <text x="574" y="106" font-size="12" font-weight="600" data-de="Wählscheibe" data-en="Rotary dial">Wählscheibe</text>
+          <text class="klein" x="574" y="120" data-de="Impulskontakt nsi" data-en="pulse contact nsi">Impulskontakt nsi</text>
+          <rect class="kasten" x="330" y="140" width="130" height="78" rx="4"/>
+          <text x="344" y="162" font-size="12" font-weight="600">L298N</text>
+          <text class="klein" x="344" y="177" data-de="H-Brücke" data-en="H-bridge">H-Brücke</text>
+          <text class="klein" x="344" y="203">IN1 · IN2 · ENA</text>
+          <rect class="kasten" x="560" y="150" width="180" height="58" rx="4"/>
+          <text x="574" y="172" font-size="12" font-weight="600" data-de="Wecker" data-en="Ringer">Wecker</text>
+          <text class="klein" x="574" y="186" data-de="Spule 1654 Ω" data-en="coil 1654 Ω">Spule 1654 Ω</text>
+          <text class="klein" x="574" y="199" data-de="25 Hz, Polwechsel" data-en="25 Hz, polarity flips">25 Hz, Polwechsel</text>
+          <rect class="kasten" x="330" y="236" width="130" height="44" rx="4"/>
+          <text x="344" y="256" font-size="12" font-weight="600">MT3608</text>
+          <text class="klein" x="344" y="270">5 V → 27 V</text>
+          <rect class="kasten" x="560" y="236" width="180" height="70" rx="4"/>
+          <text x="574" y="256" font-size="12" font-weight="600" data-de="USB-Soundkarte" data-en="USB sound card">USB-Soundkarte</text>
+          <text class="klein" x="574" y="271" data-de="Mikrofon ← Sprechkapsel" data-en="mic ← carbon capsule">Mikrofon ← Sprechkapsel</text>
+          <text class="klein" x="574" y="285" data-de="Kopfhörer → Hörkapsel" data-en="headphone → earpiece">Kopfhörer → Hörkapsel</text>
+          <text class="klein" x="574" y="299">48 kHz, ALSA plug</text>
+          <g id="drahte"></g>
+        </svg>
+      </div>
+    </div>
+
+    <ul class="teile">
+      <li><b>FeTAp 611-2 <span lang="de">von Hagenuk, orange</span><span lang="en">by Hagenuk, orange</span></b><span><span lang="de">Gehäuse, Gabelschalter, Wählscheibe, Hörer mit Kohlemikrofon, Wecker</span><span lang="en">case, hook switch, dial, handset with carbon microphone, ringer</span></span></li>
+      <li><b>Raspberry Pi 5, 4 GB</b><span><span lang="de">mit Active Cooler und dem offiziellen Netzteil 5 V / 5 A</span><span lang="en">with Active Cooler and the official 5 V / 5 A power supply</span></span></li>
+      <li><b><span lang="de">USB-Soundkarte Unitek Y-247A</span><span lang="en">USB sound card Unitek Y-247A</span></b><span><span lang="de">C-Media-Chip, kann nur 48 kHz; ALSA rechnet die 24 kHz um</span><span lang="en">C-Media chip, 48 kHz only; ALSA resamples the 24 kHz stream</span></span></li>
+      <li><b><span lang="de">H-Brücke L298N</span><span lang="en">L298N H-bridge</span></b><span><span lang="de">polt die Weckerspule 25-mal pro Sekunde um</span><span lang="en">flips the ringer coil's polarity 25 times a second</span></span></li>
+      <li><b><span lang="de">Step-up-Wandler MT3608</span><span lang="en">MT3608 boost converter</span></b><span><span lang="de">macht aus den 5 V des Pi rund 27 V, mehr schafft das Bauteil nicht</span><span lang="en">turns the Pi's 5 V into about 27 V, the most this part can do</span></span></li>
+      <li><b><span lang="de">Klinken, Litze, Steckbrücken</span><span lang="en">Jacks, wire, jumpers</span></b><span><span lang="de">zwei 3,5-mm-Stecker für die Hörerkapseln, Litze 0,14 mm²</span><span lang="en">two 3.5 mm plugs for the handset capsules, 0.14 mm² stranded wire</span></span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 5 · Klingel -->
+<section class="abschnitt innen-rand" id="klingel">
+  <div class="breite">
+    <div class="klingel">
+      <div class="wecker-bild">
+        <svg id="wecker" viewBox="0 0 320 300" role="img" aria-labelledby="wecker-titel">
+          <title id="wecker-titel">Wecker des Telefons mit Glocke und Klöppel</title>
+          <defs>
+            <radialGradient id="glanz" cx="38%" cy="30%" r="80%">
+              <stop offset="0" stop-color="#f6f6f3"/><stop offset=".45" stop-color="#bdbdb8"/><stop offset="1" stop-color="#77756f"/>
+            </radialGradient>
+          </defs>
+          <circle class="welle" cx="160" cy="150" r="118"/>
+          <circle class="welle w2" cx="160" cy="150" r="118"/>
+          <g class="glocke-g">
+            <circle class="glocke" cx="160" cy="150" r="104"/>
+            <circle cx="160" cy="150" r="70" fill="none" stroke="#ffffff" stroke-opacity=".35" stroke-width="2"/>
+            <circle cx="160" cy="150" r="14" fill="#6c6a64" stroke="#4a4844"/>
+          </g>
+          <g class="koeppel">
+            <rect x="156" y="190" width="8" height="62" rx="3" style="fill:var(--platine)"/>
+            <circle cx="160" cy="194" r="11" style="fill:var(--tinte)"/>
+          </g>
+          <rect x="112" y="248" width="96" height="34" rx="4" style="fill:var(--platine)"/>
+          <text x="160" y="270" text-anchor="middle" font-family="Azeret Mono, monospace" font-size="11" fill="#f2dfca">1654 Ω</text>
+        </svg>
+        <button class="knopf haupt" id="klingel-knopf" type="button"><span lang="de">Klingeln lassen (mit Ton)</span><span lang="en">Ring it (with sound)</span></button>
+      </div>
+      <div>
+        <p class="etikett"><span lang="de">Klingel · gemessen am 29. Juli 2026</span><span lang="en">Bell · measured on 29 July 2026</span></p>
+        <h2><span lang="de">Ich wollte ein zweites Netzteil kaufen. Gemessen habe ich dann doch zuerst.</span><span lang="en">I was about to buy a second power supply. I measured first after all.</span></h2>
+        <p class="satz" style="margin-top:18px"><span lang="de">Beim Testen der Klingel ging der Pi mehrmals komplett aus. Ich hielt die Weckerspule für den Grund und hatte schon ein Netzteil mit Spannungswandler herausgesucht. Die Messung sagte etwas anderes: Die Spule hat 1654 Ω und zieht bei 27 V nur 16 mA. Die 5-V-Schiene des Pi fiel selbst unter Dauerlast nicht unter 4,97 V. Schuld waren vier Drähte, die am Step-up-Wandler nur eingehängt waren. Seit ich sie festgelötet habe, ist der Pi nicht mehr ausgegangen.</span><span lang="en">While I was testing the bell, the Pi switched off completely several times. I blamed the ringer coil and had already picked out a power supply with a converter. The measurement said otherwise: the coil has 1654 Ω and draws only 16 mA at 27 V. The Pi's 5 V rail never dropped below 4.97 V, even under continuous load. The culprit was four wires that were only hooked into the boost converter. Since I soldered them, the Pi has not switched off again.</span></p>
+        <div class="werte">
+          <div><b>1654 Ω</b><span lang="de">Spule</span><span lang="en">coil</span></div>
+          <div><b>27 V</b><span lang="de">am Wecker</span><span lang="en">at the ringer</span></div>
+          <div><b>16 mA</b><span lang="de">Spulenstrom</span><span lang="en">coil current</span></div>
+          <div><b>25 Hz</b><span lang="de">wie bei der Post</span><span lang="en">post office standard</span></div>
+        </div>
+        <p class="satz"><span lang="de">Danach blieb der Wecker stumm. Die Vorlage aus dem Make-Magazin fährt die Spule mit halbem Tastgrad bei 30 V. Mein Wandler schafft aber nur 27 V, und bei halbem Tastgrad bleibt zu wenig Strom, um den Anker zu bewegen. Mit vollem Tastgrad und 25 Hz klingelt er. 25 Hz ist die Rufwechselspannung der Post, und im Vergleich mit 10 und 20 Hz klang sie am besten.</span><span lang="en">Then the ringer stayed silent. The Make magazine design drives the coil at half duty cycle and 30 V. My converter only manages 27 V, and at half duty there is not enough current to move the armature. At full duty and 25 Hz it rings. 25 Hz is the post office's ringing frequency, and compared with 10 and 20 Hz it sounded best.</span></p>
+        <div class="mess-rahmen">
+          <svg id="messung" viewBox="0 0 560 170" role="img" aria-labelledby="messung-titel"><title id="messung-titel">Spannung der 5-V-Schiene beim Lasttest</title></svg>
+        </div>
+        <p class="leise"><span lang="de">5-V-Schiene des Pi beim Lasttest, ausgelesen über den Spannungsregler des Pi. Gefüllt: Messwerte unter Last.</span><span lang="en">The Pi's 5 V rail during the load test, read from the Pi's power management chip. Filled: readings under load.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · Störungen -->
+<section class="abschnitt innen-rand" id="stoerungen">
+  <div class="breite">
+    <div class="abschnitt-kopf">
+      <div>
+        <p class="etikett"><span lang="de">Störungsbuch</span><span lang="en">Fault log</span></p>
+        <h2><span lang="de">Was schiefging, und was ich daraus mitnehme.</span><span lang="en">What went wrong, and what I took from it.</span></h2>
+      </div>
+      <p class="satz"><span lang="de">Die meisten Fehler lagen in der Hardware und nicht im Code. Ich halte jeden mit Datum fest.</span><span lang="en">Most faults were in the hardware, not in the code. I record each one with its date.</span></p>
+    </div>
+    <ol class="buch">
+      <li><time datetime="2026-06-07">07.06.2026</time><div><h3><span lang="de">Das Kohlemikrofon funktioniert</span><span lang="en">The carbon microphone works</span></h3></div><p><span lang="de">Fast hätte ich die alte Sprechkapsel gegen ein Elektretmikrofon getauscht. Ein Test mit einem normalen Headset hätte gleich gezeigt, dass die Soundkarte in Ordnung ist. Die Kapsel von damals läuft direkt am Mikrofoneingang.</span><span lang="en">I nearly replaced the old capsule with an electret microphone. A test with an ordinary headset would have shown right away that the sound card was fine. The original capsule works straight into the mic input.</span></p></li>
+      <li><time datetime="2026-06-07">07.06.2026</time><div><h3><span lang="de">Eine kalte Lötstelle</span><span lang="en">One cold solder joint</span></h3></div><p><span lang="de">Der Hörer blieb still. Ich habe im Treiber gesucht, dabei war eine Lötstelle in einem Klinkenstecker nicht richtig verbunden. Nachgelötet, sofort Ton.</span><span lang="en">The earpiece stayed silent. I searched in the driver, but a joint inside a jack plug was not properly connected. Resoldered, sound straight away.</span></p></li>
+      <li><time datetime="2026-06-08">08.06.2026</time><div><h3><span lang="de">Das Lötpad ist nicht der Schalter</span><span lang="en">The pad is not the switch</span></h3></div><p><span lang="de">Mein erster Draht für den Gabelschalter saß auf einem Pad, das über eine Leiterbahn fest mit dem Nachbarn verbunden war. Den echten Kontakt fand ich mit dem Durchgangsprüfer, während ich den Federarm von Hand drückte.</span><span lang="en">My first hook switch wire sat on a pad that a trace tied permanently to its neighbour. I found the real contact with a continuity tester while pressing the spring arm by hand.</span></p></li>
+      <li><time datetime="2026-06-08">08.06.2026</time><div><h3><span lang="de">Entprellen ist Pflicht</span><span lang="en">Debouncing is a must</span></h3></div><p><span lang="de">Ohne Entprellen startete das Programm beim Abheben einen Anruf nach dem anderen. Seitdem gelten 200 ms für die Gabel und 80 ms für die Wählscheibe. Am Abend lief das erste Gespräch: „Moin moin, hier ist Hein …“</span><span lang="en">Without debouncing, lifting the handset started one call after another. Since then the hook switch uses 200 ms and the dial 80 ms. That evening the first conversation worked: “Moin moin, hier ist Hein …”</span></p></li>
+      <li><time datetime="2026-07-19">19.–26.07.2026</time><div><h3><span lang="de">Ein Umweg über das Compute Module 5</span><span lang="en">A detour via the Compute Module 5</span></h3></div><p><span lang="de">Ein kleineres Board hätte besser ins Gehäuse gepasst. Die Trägerplatine war aber defekt, also bin ich nach einer Woche zum Pi 5 zurück. Dabei lernte ich, dass die Soundkarte nur 48 kHz kann und ALSA die 24 kHz umrechnen muss.</span><span lang="en">A smaller board would have fitted the case better. But the carrier board was faulty, so after a week I went back to the Pi 5. Along the way I learned that the sound card only does 48 kHz and ALSA has to resample the 24 kHz stream.</span></p></li>
+      <li><time datetime="2026-07-29">29.07.2026</time><div><h3><span lang="de">Lose Drähte statt schwaches Netzteil</span><span lang="en">Loose wires, not a weak supply</span></h3></div><p><span lang="de">Die Geschichte von der Klingel oben. Geht ein Pi 5 einfach aus, statt neu zu starten, und meldet keine Unterspannung, dann ist es ein Kontaktproblem.</span><span lang="en">The bell story above. When a Pi 5 simply switches off instead of rebooting and reports no undervoltage, it is a contact problem.</span></p></li>
+      <li><time datetime="2026-08-19">19.08.2026</time><div><h3><span lang="de">Erfundene Sätze im Protokoll</span><span lang="en">Invented sentences in the transcript</span></h3></div><p><span lang="de">Das alte Transkriptionsmodell schrieb ganze englische Sätze ins Gesprächsprotokoll, die niemand gesagt hatte. Ich bin auf ein neueres Modell umgestiegen.</span><span lang="en">The old transcription model wrote whole English sentences into the call transcript that nobody had said. I switched to a newer model.</span></p></li>
+      <li><time datetime="2026-10-18">18.10.2026</time><div><h3><span lang="de">Nur noch Netzbrummen</span><span lang="en">Nothing but mains hum</span></h3></div><p><span lang="de">Neun Tage lang kam kein verständliches Wort an. Eine Aufnahme direkt von der Soundkarte zeigte, dass rund drei Viertel der Energie bei 50, 100 und 200 Hz lagen. Der Mikrofoneingang hing offen. Ein Wackelkontakt im Hörerkabel, provisorisch behoben, die richtige Reparatur steht noch aus.</span><span lang="en">For nine days not one intelligible word got through. A recording straight from the sound card showed about three quarters of the energy at 50, 100 and 200 Hz. The mic input was floating. A loose contact in the handset cord, patched up for now; the proper repair is still to do.</span></p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 7 · Modelle -->
+<section class="abschnitt innen-rand" id="modelle">
+  <div class="breite">
+    <div class="abschnitt-kopf">
+      <div>
+        <p class="etikett"><span lang="de">Modelle · Stand 1. November 2026</span><span lang="en">Models · as of 1 November 2026</span></p>
+        <h2><span lang="de">Ein Modell für das Gespräch, mehrere für die Arbeit dahinter.</span><span lang="en">One model for the conversation, several for the work behind it.</span></h2>
+      </div>
+      <p class="satz"><span lang="de">Welches Modell wo läuft, halte ich in einer eigenen Datei im Repository fest, mit dem Wert, der tatsächlich auf dem Gerät eingestellt ist. Eine monatliche Routine vergleicht sie mit dem Code und meldet, wenn ein Anbieter ein Modell abschaltet.</span><span lang="en">I keep a dedicated file in the repository that records which model runs where, including the value actually set on the device. A monthly routine compares it with the code and flags when a provider retires a model.</span></p>
+    </div>
+    <div class="tabelle">
+      <table>
+        <thead><tr><th><span lang="de">Aufgabe</span><span lang="en">Job</span></th><th><span lang="de">Anbieter</span><span lang="en">Provider</span></th><th><span lang="de">Modell</span><span lang="en">Model</span></th><th><span lang="de">Denken</span><span lang="en">Thinking</span></th></tr></thead>
+        <tbody>
+          <tr><td><span lang="de">Das Gespräch am Telefon, alle Figuren und Camille</span><span lang="en">The phone conversation, all characters and Camille</span></td><td>OpenAI Realtime</td><td><code>gpt-realtime-2.1-mini</code></td><td>–</td></tr>
+          <tr><td><span lang="de">Mitschrift für Protokoll und Auswertung</span><span lang="en">Transcript for logging and review</span></td><td>OpenAI</td><td><code>gpt-transcribe</code></td><td>–</td></tr>
+          <tr><td><span lang="de">Websuche mitten im Gespräch, Antwort in Sekunden</span><span lang="en">Web search mid-call, answer within seconds</span></td><td>Anthropic</td><td><code>claude-haiku-5-5</code></td><td><span lang="de">aus</span><span lang="en">off</span></td></tr>
+          <tr><td><span lang="de">Gehört ein neues Thema zu einem vorhandenen?</span><span lang="en">Does a new topic belong to an existing one?</span></td><td>Anthropic</td><td><code>claude-haiku-5-5</code></td><td><span lang="de">aus</span><span lang="en">off</span></td></tr>
+          <tr><td><span lang="de">Rezeptvorschlag, strukturiert für die Haushalts-App</span><span lang="en">Recipe suggestion, structured for the household app</span></td><td>Anthropic</td><td><code>claude-opus-4-7</code></td><td>–</td></tr>
+          <tr><td><span lang="de">Nach dem Auflegen: was sich die Figur merkt</span><span lang="en">After hang-up: what the character remembers</span></td><td>Anthropic</td><td><code>claude-opus-4-7</code></td><td>–</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grundsatz">
+      <div><h3><span lang="de">Das Modell urteilt, der Code rechnet</span><span lang="en">The model judges, the code computes</span></h3><p><span lang="de">Das Sprachmodell entscheidet, welches Werkzeug passt. Speichern, Zählen und Schalten macht getesteter Python-Code.</span><span lang="en">The language model decides which tool fits. Storing, counting and switching are done by tested Python code.</span></p></div>
+      <div><h3><span lang="de">Werkzeugaufrufe ohne Anruf prüfen</span><span lang="en">Checking tool calls without a call</span></h3><p><span lang="de">Ein Prüfskript schickt Sätze als Text an das Realtime-Modell und zählt, ob das richtige Werkzeug mit den richtigen Argumenten kommt. Nach jeder Änderung am Prompt lasse ich es von Hand laufen.</span><span lang="en">A test script sends sentences as text to the Realtime model and counts whether the right tool arrives with the right arguments. I run it by hand after every prompt change.</span></p></div>
+      <div><h3><span lang="de">Tests ohne Geheimnisse</span><span lang="en">Tests without secrets</span></h3><p><span lang="de">575 Tests laufen bei jedem Pull Request, ohne einen Schlüssel für OpenAI oder Anthropic. Externe Dienste sind darin nachgebildet; Tests gegen die echte API und auf dem Pi laufen nur auf Zuruf.</span><span lang="en">575 tests run on every pull request without an OpenAI or Anthropic key. External services are mocked; tests against the real API and on the Pi only run on request.</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · Arbeitsweise -->
+<section class="abschnitt innen-rand" id="arbeitsweise">
+  <div class="breite">
+    <div class="abschnitt-kopf">
+      <div>
+        <p class="etikett"><span lang="de">Arbeitsweise</span><span lang="en">Method</span></p>
+        <h2><span lang="de">Angefangen mit einem Heft, weitergebaut im Gespräch.</span><span lang="en">Started from a magazine, built on in conversation.</span></h2>
+      </div>
+      <p class="satz"><span lang="de">Die Idee stammt aus dem Projekt „KI-Telefon“ von Dirk Wahl in der Make, Ausgabe 2/26. Seinen Code habe ich gelesen und dann eine eigene Fassung geschrieben, mit expliziter Zustandsmaschine, Werkzeugen und Tests. Entwickelt habe ich sie im Gespräch mit Claude Code. Ich entscheide, was das Telefon können soll; Claude schreibt den Code, wertet Logs aus und rechnet Messungen nach.</span><span lang="en">The idea comes from Dirk Wahl's “KI-Telefon” project in Make magazine, issue 2/26. I read his code and then wrote my own version, with an explicit state machine, tools and tests. I developed it in conversation with Claude Code. I decide what the phone should do; Claude writes the code, reads logs and checks measurements.</span></p>
+    </div>
+    <div class="zwei-spalten">
+      <div>
+        <ol class="chronik">
+          <li><time>02.06.2026</time><span lang="de">Erster Commit: Entwurf und Plan für das Grundgerüst.</span><span lang="en">First commit: design and plan for the basic framework.</span></li>
+          <li><time>06.–08.06.2026</time><span lang="de">Pi eingerichtet, Hörer, Gabel und Wählscheibe verkabelt, erstes Gespräch.</span><span lang="en">Pi set up, handset, hook switch and dial wired, first conversation.</span></li>
+          <li><time>29.07.2026</time><span lang="de">Die Klingel klingelt.</span><span lang="en">The bell rings.</span></li>
+          <li><time>17.08.2026</time><span lang="de">Camille übernimmt die 3 als Französischkurs.</span><span lang="en">Camille takes over digit 3 as a French course.</span></li>
+          <li><time>19.09.2026</time><span lang="de">Freisprechen über Elektra.</span><span lang="en">Speakerphone via Elektra.</span></li>
+          <li><time>09.10.2026</time><span lang="de">Haushalts-Gedächtnis und Websuche.</span><span lang="en">Household memory and web search.</span></li>
+          <li><time>08.11.2026</time><span lang="de">212 Commits, rund 9500 Zeilen Python im Programm.</span><span lang="en">212 commits, about 9,500 lines of Python in the program.</span></li>
+        </ol>
+      </div>
+      <div style="display:grid; gap:18px; align-content:start">
+        <p class="satz"><span lang="de">Am Mac ersetzt die Tastatur das Telefon: Die Leertaste ist der Gabelschalter, die Ziffern 1 bis 9 sind die Wählscheibe. Gabel, Wählscheibe und Klingel stecken hinter derselben Schnittstelle, ob am Mac oder am Pi.</span><span lang="en">On the Mac the keyboard stands in for the phone: the space bar is the hook switch, the digits 1 to 9 are the dial. Hook switch, dial and bell sit behind the same interface, whether on the Mac or on the Pi.</span></p>
+        <div class="befehl">KITELEFON_PLATFORM=mac uv run kitelefon</div>
+        <p class="satz"><span lang="de">Jede Festlegung halte ich mit Datum und Begründung in einem GitHub-Issue fest. Bevor ich etwas kaufe, messe ich nach. Das hat mir bei der Klingel ein Netzteil und beim Mikrofon einen Kapseltausch erspart.</span><span lang="en">I record every decision with date and reason in a GitHub issue. Before buying anything, I measure. That saved me a power supply for the bell and a capsule swap for the microphone.</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="innen-rand">
+  <div class="breite schluss">
+    <p class="etikett"><span lang="de">Bildnachweis</span><span lang="en">Image credits</span></p>
+    <ul class="nachweis">
+      <li><span lang="de">Grünes FeTAp 611-2: Felix Winkelnkemper,</span><span lang="en">Green FeTAp 611-2: Felix Winkelnkemper,</span> <a href="https://commons.wikimedia.org/wiki/File:Post_FeTAp_611-2.jpg">„Post FeTAp 611-2.jpg“</a>, Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. <span lang="de">Verkleinert, Metadaten entfernt.</span><span lang="en">Resized, metadata removed.</span></li>
+      <li><span lang="de">FeTAp 611-2 von innen: Friedrich Haag,</span><span lang="en">FeTAp 611-2 inside: Friedrich Haag,</span> <a href="https://commons.wikimedia.org/wiki/File:003_2018_07_18_Telefone.jpg">„003 2018 07 18 Telefone.jpg“</a>, Wikimedia Commons, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. <span lang="de">Verkleinert, Metadaten entfernt.</span><span lang="en">Resized, metadata removed.</span></li>
+      <li><span lang="de">Alle übrigen Fotos sind eigene Aufnahmen, ohne Metadaten; auf dem Foto des Telefons ist die alte Rufnummer entfernt. Wählscheibe, Wecker und Schaltplan sind für diese Seite gezeichnet.</span><span lang="en">All other photos are my own, with metadata removed; the old phone number is removed from the photo of the phone. The dial, the ringer and the wiring diagram were drawn for this page.</span></li>
+    </ul>
+    <p class="leise"><span lang="de">Der Quellcode liegt auf <a href="https://github.com/dragondiver/ki-telefon">GitHub</a> (MIT-Lizenz). Den Sprachkurs hole ich aus einem privaten Repository. Die Figuren sprechen mit KI-generierten Stimmen von OpenAI.</span><span lang="en">The source code is on <a href="https://github.com/dragondiver/ki-telefon">GitHub</a> (MIT licence). The language course comes from a private repository. The characters speak with AI-generated voices from OpenAI.</span></p>
+  </div>
+</footer>
+</main>
+
+<script>
+(function () {
+"use strict";
+var root = document.documentElement;
+var ruhig = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- Sprache ---------- */
+var TITEL = { de: "KI-Telefon", en: "AI Telephone" };
+function gemerkt() { try { var s = localStorage.getItem("ta-sprache"); return s === "de" || s === "en" ? s : null; } catch (e) { return null; } }
+var q = /[?&]lang=(de|en)\b/.exec(location.search);
+var sprache = q ? q[1] : gemerkt() || (/^de\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || "en") ? "de" : "en");
+var hoerer = [];
+function L(o) { return o == null ? "" : typeof o === "object" ? (o[sprache] != null ? o[sprache] : o.de) : o; }
+function setzeSprache(s) {
+  sprache = s; root.setAttribute("data-sprache", s); root.lang = s; document.title = TITEL[s];
+  [].forEach.call(document.querySelectorAll("[data-alt-" + s + "]"), function (e) { e.alt = e.getAttribute("data-alt-" + s); });
+  [].forEach.call(document.querySelectorAll("#plan text[data-" + s + "]"), function (e) { e.textContent = e.getAttribute("data-" + s); });
+  document.getElementById("sprachwahl").setAttribute("aria-label", s === "de" ? "Switch to English" : "Auf Deutsch umschalten");
+  hoerer.forEach(function (f) { f(); });
+}
+document.getElementById("sprachwahl").addEventListener("click", function () {
+  setzeSprache(sprache === "de" ? "en" : "de");
+  try { localStorage.setItem("ta-sprache", sprache); } catch (e) { /* Wahl gilt dann nur bis zum Neuladen */ }
+});
+
+/* ---------- Ton ---------- */
+var ctx = null;
+function audio() {
+  if (!ctx) { var A = window.AudioContext || window.webkitAudioContext; if (!A) return null; ctx = new A(); }
+  if (ctx.state === "suspended") ctx.resume();
+  return ctx;
+}
+function klick(zeit, laut) {
+  var c = audio(); if (!c) return;
+  var n = c.createBufferSource(), b = c.createBuffer(1, c.sampleRate * 0.012, c.sampleRate), d = b.getChannelData(0);
+  for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+  var g = c.createGain(); g.gain.value = laut || 0.35; n.buffer = b; n.connect(g).connect(c.destination); n.start(zeit || c.currentTime);
+}
+function ton(freq, start, dauer, laut) {
+  var c = audio(); if (!c) return null;
+  var o = c.createOscillator(), g = c.createGain();
+  o.type = "sine"; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, start); g.gain.linearRampToValueAtTime(laut || 0.12, start + 0.02);
+  g.gain.setValueAtTime(laut || 0.12, start + dauer - 0.03); g.gain.linearRampToValueAtTime(0, start + dauer);
+  o.connect(g).connect(c.destination); o.start(start); o.stop(start + dauer + 0.02);
+  return o;
+}
+
+/* ---------- Figuren ---------- */
+var FIGUREN = {
+  1: { name: "Hein", art: { de: "Deutsch · norddeutsch gefärbt", en: "German · northern accent" }, text: { de: "Seit dreißig Jahren Fischhändler in Hamburg. Steht um vier auf, kennt jeden Kutter beim Namen und hält nicht viel von großen Worten. Er war am 8. Juni der Erste am Apparat.", en: "A fishmonger in Hamburg for thirty years. Gets up at four, knows every cutter by name and has little time for big words. He was the first to answer on 8 June." } },
+  2: { name: "Holger", art: { de: "Deutsch · schwäbisch gefärbt", en: "German · Swabian accent" }, text: { de: "Aus der Gegend von Stuttgart, gelernter Maschinenbauer und seit seiner Jugend Heavy-Metal-Fan. Sammelt Schallplatten und war auf mehr Konzerten, als er zu Hause zugibt.", en: "From near Stuttgart, a trained mechanical engineer and a heavy metal fan since his teens. Collects records and has been to more concerts than he admits at home." } },
+  3: { name: "Camille", art: { de: "Französisch · Sprachkurs", en: "French · language course" }, text: { de: "Der Französischkurs. Camille führt den Lernstand, notiert Fehler und erzählt vom Wetter in Rennes und den Nachrichten des Tages. Auf den unteren Stufen darf man auch Deutsch sprechen.", en: "The French course. Camille keeps track of progress, notes mistakes and talks about the weather in Rennes and the day's news. At the lower levels German is allowed too." } },
+  4: { name: "Marty", art: { de: "Deutsch · der verrückte Professor", en: "German · the mad professor" }, text: { de: "Amerikanischer Physikprofessor im Ruhestand. Freut sich ehrlich über jede Frage und hat zu jeder eine Geschichte.", en: "A retired American physics professor. Genuinely pleased by every question and has a story for each one." } },
+  5: { name: "Astrid", art: { de: "Deutsch · Gärtnerin", en: "German · gardener" }, text: { de: "Hat eine eigene Staudengärtnerei und ist in den Siebzigern in einer Landkommune groß geworden.", en: "Runs her own perennial nursery and grew up in a rural commune in the seventies." } },
+  6: { name: "Jean-Luc", art: { de: "Deutsch · Koch aus Lyon", en: "German · chef from Lyon" }, text: { de: "Koch aus Lyon, seit vielen Jahren in Deutschland. Beim Essen wird er leidenschaftlich, sonst ist er gelassen.", en: "A chef from Lyon who has lived in Germany for many years. Passionate about food, relaxed about everything else." } },
+  7: { name: "Alex", art: { de: "Deutsch · Gründer", en: "German · founder" }, text: { de: "Hat zwei Firmen gegründet. Eine davon ging gründlich schief, und darüber redet Alex offener als über die andere.", en: "Has founded two companies. One went badly wrong, and Alex talks about that one more openly than the other." } },
+  8: { name: "Ravi", art: { de: "Englisch · Java-Entwickler", en: "English · Java developer" }, text: { de: "Java-Entwickler in Bengaluru, hält seit elf Jahren dasselbe Bankensystem am Laufen. Hat zu Frameworks Meinungen, und nur wenige davon sind begeistert.", en: "A Java developer in Bengaluru who has kept the same banking system running for eleven years. Has opinions about frameworks, and few of them are enthusiastic." } },
+  9: { name: { de: "Die KI", en: "The AI" }, art: { de: "Deutsch · ohne Rolle", en: "German · no role" }, text: { de: "Eine künstliche Intelligenz am Telefon, die daraus kein Geheimnis macht. Freundlich, klar, ohne Getue.", en: "An artificial intelligence on the phone that makes no secret of it. Friendly, clear, no fuss." } },
+  0: { name: { de: "Herunterfahren", en: "Shut down" }, art: { de: "Keine Figur", en: "No character" }, text: { de: "Ist die Option eingeschaltet, fährt die 0 den Pi sauber herunter: drei fallende Töne, dann fünf Sekunden Frist. Wer in der Zeit auflegt, bricht ab. Die 0 ist der längste Weg auf der Scheibe und wird kaum aus Versehen gewählt.", en: "With the option switched on, 0 shuts the Pi down cleanly: three falling tones, then a five-second grace period. Hanging up in that time cancels it. 0 is the longest pull on the dial, so it is rarely dialled by accident." } }
+};
+var gewaehlt = null;
+function zeigeFigur(z, neu) {
+  var f = FIGUREN[z], el = document.getElementById("figur");
+  if (!f) {
+    el.innerHTML = '<span class="ziffer">?</span><p class="art">' + L({ de: "Noch nichts gewählt", en: "Nothing dialled yet" }) + '</p><h3>' + L({ de: "Neun Figuren, eine Ziffer je Figur", en: "Nine characters, one digit each" }) + '</h3><p class="beschr">' + L({ de: "Dreh die Scheibe bis zum Anschlag oder tipp unten eine Ziffer an. Wer nicht bis zum Anschlag dreht, wählt wie früher eine kleinere Zahl.", en: "Turn the dial to the stop or tap a digit below. If you let go before the stop, you dial a lower number, just like on the real thing." }) + '</p>';
+  } else {
+    el.innerHTML = '<span class="ziffer">' + z + '</span><p class="art">' + L(f.art) + '</p><h3>' + L(f.name) + '</h3><p class="beschr">' + L(f.text) + '</p>';
+  }
+  if (neu && !ruhig) { el.classList.remove("neu"); void el.offsetWidth; el.classList.add("neu"); }
+  document.getElementById("mitte-oben").textContent = f ? L({ de: "ZIFFER " + z, en: "DIGIT " + z }) : L({ de: "FIGUR", en: "CHARACTER" });
+  document.getElementById("mitte-name").textContent = f ? L(f.name).toUpperCase() : L({ de: "WÄHLEN", en: "DIAL" });
+  document.getElementById("mitte-unten").textContent = f ? (z === 0 ? "—" : L({ de: "AM APPARAT", en: "SPEAKING" })) : "1 – 9 · 0";
+  [].forEach.call(document.querySelectorAll("#wahl-tasten button"), function (b) { b.setAttribute("aria-pressed", String(+b.dataset.z === z)); });
+}
+hoerer.push(function () { zeigeFigur(gewaehlt, false); });
+
+/* ---------- Wählscheibe ---------- */
+/* Winkel in Grad, im Uhrzeigersinn ab 3 Uhr. Loch k (1..10, 10 = Ziffer 0) liegt bei -30k.
+   Der Anschlag steht bei 30°, Loch k muss also 30 + 30k Grad bis zum Anschlag laufen. */
+var C = 200, R_LOCH = 136, R_RAND = 166, R_INNEN = 98, LOCH = 23, ANSCHLAG = 30;
+var svgNS = "http://www.w3.org/2000/svg";
+var drehteil = document.getElementById("drehteil"), scheibe = document.getElementById("scheibe");
+function pol(r, grad) { var a = grad * Math.PI / 180; return [C + r * Math.cos(a), C + r * Math.sin(a)]; }
+function kreis(cx, cy, r) { return "M" + (cx - r) + " " + cy + "a" + r + " " + r + " 0 1 0 " + 2 * r + " 0a" + r + " " + r + " 0 1 0 " + -2 * r + " 0Z"; }
+(function bauen() {
+  var pfad = kreis(C, C, R_RAND) + kreis(C, C, R_INNEN - 30);
+  var zg = document.getElementById("ziffern"), lg = document.getElementById("loecher");
+  for (var k = 1; k <= 10; k++) {
+    var p = pol(R_LOCH, -30 * k), z = k % 10;
+    pfad += kreis(p[0], p[1], LOCH);
+    var s = document.createElementNS(svgNS, "circle");
+    s.setAttribute("cx", p[0]); s.setAttribute("cy", p[1]); s.setAttribute("r", LOCH - 3); s.setAttribute("fill", "#141312"); zg.appendChild(s);
+    var t = document.createElementNS(svgNS, "text");
+    t.setAttribute("x", p[0]); t.setAttribute("y", p[1] + 9); t.textContent = z; zg.appendChild(t);
+    var c = document.createElementNS(svgNS, "circle");
+    c.setAttribute("cx", p[0]); c.setAttribute("cy", p[1]); c.setAttribute("r", LOCH);
+    c.setAttribute("class", "loch"); c.setAttribute("fill", "transparent"); c.setAttribute("stroke", "#ffffff"); c.setAttribute("stroke-opacity", ".8"); c.setAttribute("stroke-width", "1.5");
+    c.dataset.k = k; lg.appendChild(c);
+  }
+  document.getElementById("lochscheibe").setAttribute("d", pfad);
+  var imp = document.getElementById("impulse");
+  for (var i = 0; i < 10; i++) imp.appendChild(document.createElement("i"));
+  var wt = document.getElementById("wahl-tasten");
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].forEach(function (z) {
+    var b = document.createElement("button"); b.type = "button"; b.textContent = z; b.dataset.z = z;
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", function () { waehle(z === 0 ? 10 : z); });
+    wt.appendChild(b);
+  });
+})();
+
+var winkel = 0, laeuft = false, ziehen = null;
+function setzeWinkel(w) { winkel = w; drehteil.setAttribute("transform", "rotate(" + w.toFixed(2) + " 200 200)"); }
+function maxWinkel(k) { return ANSCHLAG + 30 * k; }
+function impulsLampen(n, an) { var l = document.querySelectorAll("#impulse i"); for (var i = 0; i < l.length; i++) l[i].classList.toggle("an", i < n && an); }
+
+/* Rücklauf: 30° je Impuls in 100 ms. Die ersten 30° sind Leerweg ohne Impuls. */
+function ruecklauf(von) {
+  laeuft = true;
+  var impulse = Math.max(0, Math.min(10, Math.floor((von - ANSCHLAG + 6) / 30)));
+  var dauer = von / 300 * 1000, t0 = performance.now(), gezaehlt = 0;
+  var hoerbar = document.getElementById("ton-impulse").checked;
+  impulsLampen(0, false);
+  function schritt(t) {
+    var p = Math.min(1, (t - t0) / dauer), w = von * (1 - p);
+    setzeWinkel(w);
+    var erreicht = Math.min(impulse, Math.floor((von - w - 15) / 30) + 1);
+    if (von - w < 15) erreicht = 0;
+    while (gezaehlt < erreicht) { gezaehlt++; impulsLampen(gezaehlt, true); if (hoerbar) klick(); }
+    if (p < 1) requestAnimationFrame(schritt);
+    else {
+      laeuft = false;
+      if (impulse > 0) { gewaehlt = impulse % 10; zeigeFigur(gewaehlt, true); }
+      setTimeout(function () { if (!laeuft) impulsLampen(0, false); }, 1400);
+    }
+  }
+  if (ruhig) { setzeWinkel(0); for (var i = 1; i <= impulse; i++) impulsLampen(i, true); if (impulse > 0) { gewaehlt = impulse % 10; zeigeFigur(gewaehlt, true); } laeuft = false; return; }
+  requestAnimationFrame(schritt);
+}
+function waehle(k) {
+  if (laeuft || ziehen) return;
+  if (ruhig) { ruecklauf(maxWinkel(k)); return; }
+  laeuft = true;
+  var ziel = maxWinkel(k), t0 = performance.now(), dauer = 260 + ziel * 1.4;
+  function hin(t) {
+    var p = Math.min(1, (t - t0) / dauer), e = 1 - Math.pow(1 - p, 3);
+    setzeWinkel(ziel * e);
+    if (p < 1) requestAnimationFrame(hin); else setTimeout(function () { ruecklauf(ziel); }, 120);
+  }
+  requestAnimationFrame(hin);
+}
+function winkelVon(ev) {
+  var r = scheibe.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width * 400 - C, y = (ev.clientY - r.top) / r.height * 400 - C;
+  return Math.atan2(y, x) * 180 / Math.PI;
+}
+scheibe.addEventListener("pointerdown", function (ev) {
+  var loch = ev.target.closest && ev.target.closest(".loch");
+  if (!loch || laeuft) return;
+  ev.preventDefault();
+  var k = +loch.dataset.k;
+  ziehen = { k: k, start: winkelVon(ev), basis: winkel, max: maxWinkel(k), bewegt: false };
+  scheibe.classList.add("zieht");
+  try { scheibe.setPointerCapture(ev.pointerId); } catch (e) { /* ältere Browser */ }
+});
+scheibe.addEventListener("pointermove", function (ev) {
+  if (!ziehen) return;
+  var d = winkelVon(ev) - ziehen.start;
+  while (d < -180) d += 360; while (d > 180) d -= 360;
+  /* Fortlaufend aufsummieren, damit lange Wege über 180° funktionieren */
+  ziehen.start += d;
+  var w = Math.max(0, Math.min(ziehen.max, winkel + d));
+  if (Math.abs(w) > 4) ziehen.bewegt = true;
+  setzeWinkel(w);
+});
+function loslassen() {
+  if (!ziehen) return;
+  var z = ziehen; ziehen = null; scheibe.classList.remove("zieht");
+  if (!z.bewegt) { setzeWinkel(0); waehle(z.k); return; }
+  if (winkel > 2) ruecklauf(winkel);
+}
+scheibe.addEventListener("pointerup", loslassen);
+scheibe.addEventListener("pointercancel", loslassen);
+document.addEventListener("keydown", function (ev) {
+  if (ev.target.closest && ev.target.closest("input, textarea, button")) return;
+  var r = scheibe.getBoundingClientRect();
+  if (r.bottom < 0 || r.top > innerHeight) return;
+  if (/^[0-9]$/.test(ev.key)) waehle(ev.key === "0" ? 10 : +ev.key);
+});
+zeigeFigur(null, false);
+
+/* ---------- Anruf nachspielen ---------- */
+var anrufLaeuft = false, anrufTimer = [], anrufToene = [];
+var schritte = [].slice.call(document.querySelectorAll("#ablauf li"));
+var ANZEIGE = {
+  ruhe: { de: "Spielt den ersten Anruf vom 8. Juni nach, mit Ziffer 1.", en: "Replays the first call from 8 June, dialling 1." },
+  ab: { de: "21:02:14  hookswitch lifted · Freizeichen 425 Hz", en: "21:02:14  hookswitch lifted · dial tone 425 Hz" },
+  wahl: { de: "21:02:18  digit received: 1 · selected role: Hamburger", en: "21:02:18  digit received: 1 · selected role: Hamburger" },
+  frei: { de: "call state: dialing → ringback · Sitzung wird aufgebaut", en: "call state: dialing → ringback · setting up the session" },
+  gespraech: { de: "call state: ringback → in_call  <q>Moin moin, hier ist Hein …</q><br>Hier spricht die Stimme deines Browsers. Am Telefon spricht Hein mit der Stimme „cedar“ von OpenAI.", en: "call state: ringback → in_call  <q>Moin moin, hier ist Hein …</q><br>This is your browser's voice. On the phone Hein speaks with OpenAI's “cedar” voice." },
+  aus: { de: "Aufgelegt. Anrufe heute: 1", en: "Hung up. Calls today: 1" }
+};
+var anzeigeStand = "ruhe";
+function anzeige(k) { anzeigeStand = k; document.getElementById("anruf-anzeige").innerHTML = L(ANZEIGE[k]); }
+hoerer.push(function () { anzeige(anzeigeStand); });
+function markiere(i) { schritte.forEach(function (li, j) { li.classList.toggle("jetzt", j === i); }); }
+/* Heins Satz aus dem Log vom 8. Juni. Eine Aufnahme gibt es noch nicht, also spricht die Browserstimme. */
+function sprich(text) {
+  if (!("speechSynthesis" in window)) return;
+  var u = new SpeechSynthesisUtterance(text), stimmen = speechSynthesis.getVoices();
+  var de = stimmen.filter(function (v) { return /^de(-|_|$)/i.test(v.lang); });
+  var mann = de.filter(function (v) { return /male|mann|markus|yannick|viktor|conrad|stefan|hans|klaus/i.test(v.name) && !/female/i.test(v.name); });
+  u.voice = mann[0] || de[0] || null; u.lang = "de-DE"; u.rate = 0.92; u.pitch = 0.85;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+if ("speechSynthesis" in window) { speechSynthesis.getVoices(); }
+function anrufEnde() {
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  anrufTimer.forEach(clearTimeout); anrufTimer = [];
+  anrufToene.forEach(function (o) { try { o.stop(); } catch (e) { /* schon aus */ } }); anrufToene = [];
+  anrufLaeuft = false;
+  document.getElementById("anruf-knopf").innerHTML = '<span lang="de">Hörer abheben (mit Ton)</span><span lang="en">Lift handset (with sound)</span>';
+}
+function spaeter(ms, f) { anrufTimer.push(setTimeout(f, ms)); }
+document.getElementById("anruf-knopf").addEventListener("click", function () {
+  if (anrufLaeuft) { anrufEnde(); markiere(4); anzeige("aus"); spaeter(2500, function () { markiere(-1); anzeige("ruhe"); }); return; }
+  anrufEnde(); anrufLaeuft = true;
+  this.innerHTML = '<span lang="de">Auflegen</span><span lang="en">Hang up</span>';
+  var c = audio(), t = c ? c.currentTime : 0;
+  markiere(0); anzeige("ab");
+  if (c) anrufToene.push(ton(425, t + 0.05, 2.2, 0.08));
+  spaeter(2300, function () {
+    markiere(1); anzeige("wahl");
+    if (c) { var t1 = c.currentTime + 0.2; klick(t1, 0.3); }
+  });
+  spaeter(3300, function () {
+    markiere(2); anzeige("frei");
+    if (c) { var t2 = c.currentTime; anrufToene.push(ton(425, t2 + 0.05, 1.0, 0.08)); }
+  });
+  spaeter(6000, function () { markiere(3); anzeige("gespraech"); sprich("Moin moin, hier ist Hein."); });
+  spaeter(12500, function () { anrufEnde(); markiere(4); anzeige("aus"); spaeter(2500, function () { markiere(-1); anzeige("ruhe"); }); });
+});
+
+/* ---------- Klingel ---------- */
+var weckerLaeuft = false;
+document.getElementById("klingel-knopf").addEventListener("click", function () {
+  if (weckerLaeuft) return; weckerLaeuft = true;
+  var w = document.getElementById("wecker"), c = audio();
+  /* Ruf: 1 s Klingeln, 4 s Pause, wie bei der Post. Hier zwei Rufe, die Pause verkürzt. */
+  [0, 2.2].forEach(function (ab) {
+    setTimeout(function () { w.classList.add("klingelt"); }, ab * 1000);
+    setTimeout(function () { w.classList.remove("klingelt"); }, ab * 1000 + 1000);
+    if (!c) return;
+    var t0 = c.currentTime + ab + 0.03, g = c.createGain(); g.gain.value = 0; g.connect(c.destination);
+    [[1180, 1], [2650, .45], [3900, .25], [5300, .12]].forEach(function (p) {
+      var o = c.createOscillator(), og = c.createGain(); o.frequency.value = p[0]; og.gain.value = p[1]; o.connect(og).connect(g); o.start(t0); o.stop(t0 + 1.4);
+    });
+    for (var i = 0; i < 25; i++) { var s = t0 + i / 25; g.gain.setValueAtTime(0.16, s); g.gain.exponentialRampToValueAtTime(0.03, s + 0.038); }
+    g.gain.setValueAtTime(0.03, t0 + 1); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.35);
+  });
+  setTimeout(function () { weckerLaeuft = false; }, 3400);
+});
+
+/* ---------- Messwerte 5-V-Schiene (docs/stromversorgung.md, 29.07.2026) ---------- */
+(function messung() {
+  var svg = document.getElementById("messung");
+  var REIHEN = [
+    [{ de: "Leerlauf", en: "Idle" }, [5.119], true],
+    [{ de: "100-ms-Puls, 50 %", en: "100 ms pulse, 50 %" }, [5.123], false],
+    [{ de: "2 s Last, 50 %", en: "2 s load, 50 %" }, [5.124, 5.112, 5.119, 5.111], false],
+    [{ de: "2 s Last, 100 %", en: "2 s load, 100 %" }, [5.140, 5.071, 4.967, 5.138], false]
+  ];
+  var X0 = 150, X1 = 540, V0 = 4.90, V1 = 5.20;
+  function x(v) { return X0 + (v - V0) / (V1 - V0) * (X1 - X0); }
+  function zeichnen() {
+    while (svg.lastChild && svg.lastChild.nodeName !== "title") svg.removeChild(svg.lastChild);
+    var h = "";
+    [4.90, 5.00, 5.10, 5.20].forEach(function (v) {
+      h += '<line class="gitter" x1="' + x(v) + '" x2="' + x(v) + '" y1="10" y2="140"/>';
+      h += '<text x="' + x(v) + '" y="158" text-anchor="middle">' + v.toFixed(2).replace(".", sprache === "de" ? "," : ".") + ' V</text>';
+    });
+    h += '<line class="achse" x1="' + X0 + '" x2="' + X1 + '" y1="140" y2="140"/>';
+    REIHEN.forEach(function (r, i) {
+      var y = 26 + i * 32;
+      h += '<text x="0" y="' + (y + 4) + '">' + L(r[0]) + '</text>';
+      r[1].forEach(function (v) { h += '<circle class="punkt' + (r[2] ? " leer" : "") + '" cx="' + x(v).toFixed(1) + '" cy="' + y + '" r="5"><title>' + v.toFixed(3) + ' V</title></circle>'; });
+    });
+    svg.insertAdjacentHTML("beforeend", h);
+  }
+  zeichnen(); hoerer.push(zeichnen);
+})();
+
+/* ---------- Verkabelung: Drähte zeichnen sich beim Scrollen ---------- */
+(function plan() {
+  var PINS = [["GPIO 5", 92], ["GPIO 26", 120], ["GPIO 17", 158], ["GPIO 27", 178], ["GPIO 22", 198], ["5 V", 238], ["GND", 258], ["USB", 286]];
+  var pg = document.getElementById("pins"), h = "";
+  PINS.forEach(function (p) { h += '<rect class="pin" x="184" y="' + (p[1] - 4) + '" width="12" height="8" rx="1.5"/><text x="174" y="' + (p[1] + 4) + '" text-anchor="end" font-size="11">' + p[0] + '</text>'; });
+  pg.innerHTML = h;
+  var DRAEHTE = [
+    ["var(--violett)", "M196 92 C300 92 420 52 560 52"],
+    ["var(--gelb)", "M196 120 C320 120 430 108 560 108"],
+    ["var(--gruen)", "M196 158 C260 158 280 162 330 162"],
+    ["var(--blau)", "M196 178 C260 178 280 182 330 182"],
+    ["var(--weiss)", "M196 198 C260 198 280 204 330 204"],
+    ["var(--rot)", "M196 238 C260 238 280 252 330 252"],
+    ["var(--rot)", "M460 258 C500 258 480 230 445 226 C420 222 410 222 410 218"],
+    ["var(--orange)", "M460 172 C500 172 520 178 560 178"],
+    ["var(--tinte-2)", "M196 286 C330 286 420 272 560 272"]
+  ];
+  var dg = document.getElementById("drahte"), g = "";
+  DRAEHTE.forEach(function (d) { g += '<path class="geist" d="' + d[1] + '"/>'; });
+  DRAEHTE.forEach(function (d) { g += '<path class="draht" style="stroke:' + d[0] + '" d="' + d[1] + '"/>'; });
+  dg.innerHTML = g;
+  var pfade = [].slice.call(dg.querySelectorAll(".draht"));
+  var laengen = pfade.map(function (p) { var l = p.getTotalLength(); p.style.strokeDasharray = l + " " + l; return l; });
+  var rahmen = document.querySelector(".plan-rahmen");
+  function aktualisieren() {
+    var r = rahmen.getBoundingClientRect(), vh = innerHeight;
+    var p = ruhig ? 1 : Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.75)));
+    pfade.forEach(function (pf, i) {
+      var eigen = Math.max(0, Math.min(1, p * 1.6 - i * 0.07));
+      pf.style.strokeDashoffset = (laengen[i] * (1 - eigen)).toFixed(1);
+    });
+  }
+  aktualisieren();
+  addEventListener("scroll", aktualisieren, { passive: true });
+  addEventListener("resize", aktualisieren);
+})();
+
+/* ---------- Navigation ---------- */
+(function nav() {
+  var links = [].slice.call(document.querySelectorAll(".wahlkarte a"));
+  var ziele = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  function markieren() {
+    var mitte = innerHeight * 0.35, aktiv = 0;
+    ziele.forEach(function (z, i) { if (z && z.getBoundingClientRect().top < mitte) aktiv = i; });
+    links.forEach(function (a, i) { a.classList.toggle("aktiv", i === aktiv); });
+  }
+  markieren(); addEventListener("scroll", markieren, { passive: true });
+})();
+
+setzeSprache(sprache);
+})();
+</script>
+</body>
+</html>
