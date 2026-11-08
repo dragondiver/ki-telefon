@@ -1,9 +1,9 @@
 ---
 name: developing-on-the-pi
-description: Use when building, testing, deploying, or debugging the telefon-ai KI-Telefon on the Raspberry Pi — SSH connection, uv on the login shell only, syncing code from the Mac, running the pytest suite on the Pi, or exercising GPIO/audio/bell hardware that physically moves parts.
+description: Use when building, testing, deploying, or debugging the ki-telefon KI-Telefon on the Raspberry Pi — SSH connection, uv on the login shell only, syncing code from the Mac, running the pytest suite on the Pi, or exercising GPIO/audio/bell hardware that physically moves parts.
 ---
 
-# Developing on the Pi (telefon-ai)
+# Developing on the Pi (ki-telefon)
 
 Living reference for working on the KI-Telefon's target hardware (Raspberry Pi 5,
 `KITELEFON_PLATFORM=pi`). Refine it whenever a new Pi lesson is learned — this file
@@ -14,7 +14,7 @@ is meant to grow.
 - **SSH:** `ssh kitelefon.local` (alias in `~/.ssh/config`, user `florian`,
   key `id_telefonki`). The second alias `telefon-ai.local` currently times out —
   use `kitelefon.local`.
-- **Repo path:** `~/telefon-ai` on the Pi (NOT `~/Development/...` like the Mac).
+- **Repo path:** `~/telefon-ai` on the Pi (NOT `~/Development/...` like the Mac). The folder keeps the old repo name, its remote is ki-telefon.
 - **`uv` lives at `~/.local/bin/uv` and is ONLY on the login-shell PATH.** A plain
   `ssh host 'uv ...'` fails with `command not found`. Always wrap in a login shell:
 
