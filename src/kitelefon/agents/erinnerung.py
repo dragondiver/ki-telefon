@@ -22,6 +22,12 @@ log = logging.getLogger(__name__)
 
 MODEL = "claude-opus-4-7"
 
+# So steht der Anrufer im Verlauf (realtime.py), die Figur steht dort mit
+# ihrem Rollennamen.
+ANRUFER = "Anrufer"
+# Darunter hat der Anrufer nichts gesagt, was man sich merken koennte.
+MIN_ANRUFER_ZEICHEN = 40
+
 SYSTEM_PROMPT = """Du destillierst aus einem Telefongespräch, was sich ein \
 Bekannter davon merken würde. Nicht mehr.
 
@@ -66,10 +72,15 @@ async def destilliere(verlauf: list[tuple[str, str]]) -> Erinnerung | None:
     Ein Fehler hier darf nie ein Telefonat beeintraechtigen — das Gespraech
     ist zu diesem Zeitpunkt ohnehin schon vorbei.
     """
-    text = transkript_text(verlauf)
-    if len(text) < 80:
+    # Nur die Saetze des Anrufers zaehlen fuer die Mindestlaenge. Vorher
+    # zaehlte das ganze Transkript: Holgers Begruessung allein (~150
+    # Zeichen, kein Wort vom Anrufer) kam durch, und das Modell lieferte
+    # "Heisst Holger." als Fakt ueber den Anrufer (#21).
+    anrufer = " ".join(was.strip() for wer, was in verlauf if wer == ANRUFER and was.strip())
+    if len(anrufer) < MIN_ANRUFER_ZEICHEN:
         # Ein Gruss und ein Auflegen ergeben keine Erinnerung.
         return None
+    text = transkript_text(verlauf)
     try:
         response = await _get_client().messages.parse(
             model=MODEL,
