@@ -17,7 +17,10 @@ concurrency:
 jobs:
   test:
     name: Tests
-    runs-on: ubuntu-latest
+    # Fest auf 24.04: Mit ubuntu-26.04 (ab Nov. 2026 ubuntu-latest) bringt
+    # libportaudio2 19.7 einen PulseAudio-Zweig mit, der ohne Soundserver schon
+    # beim Import von sounddevice abbricht. Erst umstellen, wenn das geloest ist.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
