@@ -284,3 +284,20 @@ async def test_auch_nach_dem_aendern_liegen_die_details_bei(monkeypatch):
 
     assert ergebnis["gespeichert"] is False
     assert ergebnis["schritte"] == ["Nur Mehl und Wasser verrühren."]
+
+
+async def test_abgelehntes_rezept_legt_das_gespraech_nicht_lahm(monkeypatch):
+    """Opus 5.5 kann ablehnen, dann ist parsed_output leer (Modellwechsel 14.11.2026)."""
+    from types import SimpleNamespace
+
+    from kitelefon.agents import recipes
+
+    class _Abgelehnt:
+        async def parse(self, **kwargs):
+            return SimpleNamespace(stop_reason="refusal", parsed_output=None)
+
+    monkeypatch.setattr(
+        recipes, "_get_client", lambda: SimpleNamespace(beta=SimpleNamespace(messages=_Abgelehnt()))
+    )
+    ergebnis = await recipes.handle_suggest_recipe({"query": "Kichererbsen mit Spinat"})
+    assert ergebnis["ok"] is False

@@ -20,7 +20,14 @@ from kitelefon.memory import MAX_FAKTEN
 
 log = logging.getLogger(__name__)
 
-MODEL = "claude-opus-4-7"
+# Opus 5.5 denkt immer mit (abschalten geht nicht), deshalb Aufwand "low"
+# und max_tokens mit Luft fuers Denken. Messung 14.11.2026 am Hein-Anruf:
+# 4.7 speicherte zweimal "Spricht leise." aus einem Tontest, 5.5 keinen
+# Fakt; beide ~2,5 s.
+MODEL = "claude-opus-5-5"
+EFFORT = "low"
+# Lehnt das Modell ab, faehrt die API die Anfrage auf einem Ersatzmodell.
+FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
 # So steht der Anrufer im Verlauf (realtime.py), die Figur steht dort mit
 # ihrem Rollennamen.
@@ -82,9 +89,12 @@ async def destilliere(verlauf: list[tuple[str, str]]) -> Erinnerung | None:
         return None
     text = transkript_text(verlauf)
     try:
-        response = await _get_client().messages.parse(
+        response = await _get_client().beta.messages.parse(
             model=MODEL,
-            max_tokens=1024,
+            max_tokens=4096,
+            output_config={"effort": EFFORT},
+            betas=[FALLBACK_BETA],
+            fallbacks="default",
             system=[
                 {
                     "type": "text",
@@ -95,6 +105,9 @@ async def destilliere(verlauf: list[tuple[str, str]]) -> Erinnerung | None:
             messages=[{"role": "user", "content": text}],
             output_format=Erinnerung,
         )
+        if response.stop_reason == "refusal":
+            log.warning("Erinnerung: Modell hat abgelehnt")
+            return None
         return response.parsed_output
     except anthropic.APIError as exc:
         log.warning("Erinnerung konnte nicht destilliert werden: %s", exc)
