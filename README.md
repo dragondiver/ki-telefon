@@ -25,7 +25,7 @@ als feste Abhängigkeit steht. Ohne Lesezugriff darauf schlägt `uv sync` fehl.
                        ▼                     ▼                     ▼
                 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
                 │   Spotify    │     │ Mise-en-Place│     │  Claude API  │
-                │  Connect →   │     │  Einkaufs-   │     │ (Opus 4.7) → │
+                │  Connect →   │     │  Einkaufs-   │     │ (Opus 5.5) → │
                 │  Evoke Play  │     │   liste +    │     │   Rezept     │
                 │              │     │  Rezepte     │     │  Generator   │
                 └──────────────┘     └──────────────┘     └──────────────┘
@@ -138,7 +138,7 @@ wird sie nicht versucht.
   `POST /api/agent/shopping/items` (Bearer-Auth, `AGENT_FAMILY_EMAIL`
   bestimmt die Familie).
 - **Rezepte:** `suggest_recipe` ruft die **Claude API** auf der
-  Telefon-Seite (Opus 4.7 via `messages.parse()` mit Pydantic-Schema,
+  Telefon-Seite (Opus 5.5 via `messages.parse()` mit Pydantic-Schema,
   Prompt-Caching für den System-Prompt). Der Entwurf wird im Modul
   zwischen­ge­speichert, die Realtime-KI bekommt eine Zusammenfassung zum
   Vorlesen. Bei Verfeinerungen („weniger Sahne") wird neu generiert.

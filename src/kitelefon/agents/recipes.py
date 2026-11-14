@@ -31,7 +31,11 @@ from pydantic import BaseModel, Field
 load_dotenv()
 log = logging.getLogger(__name__)
 
-MODEL = "claude-opus-4-7"
+# Opus 5.5 denkt immer mit, deshalb Aufwand "low" und mehr max_tokens.
+# Messung 14.11.2026: 8,5-11 s statt 13-17 s mit Opus 4.7, gleichwertiges Rezept.
+MODEL = "claude-opus-5-5"
+EFFORT = "low"
+FALLBACK_BETA = "server-side-fallback-2026-07-01"
 UNITS = Literal["g", "kg", "ml", "l", "stueck", "el", "tl", "prise", "bund", "dose", "packung"]
 
 
@@ -138,11 +142,18 @@ def _details(recipe: Recipe) -> dict:
     }
 
 
+class KeinRezept(Exception):
+    """Claude hat kein Rezept geliefert (Ablehnung oder leere Antwort)."""
+
+
 async def _generate_recipe(query: str) -> Recipe:
     """Ein Rezept von Claude erzeugen. Eigene Funktion, damit Tests sie ersetzen."""
-    response = await _get_client().messages.parse(
+    response = await _get_client().beta.messages.parse(
         model=MODEL,
-        max_tokens=4096,
+        max_tokens=8192,
+        output_config={"effort": EFFORT},
+        betas=[FALLBACK_BETA],
+        fallbacks="default",
         system=[
             {
                 "type": "text",
@@ -153,6 +164,8 @@ async def _generate_recipe(query: str) -> Recipe:
         messages=[{"role": "user", "content": query}],
         output_format=Recipe,
     )
+    if response.stop_reason == "refusal" or response.parsed_output is None:
+        raise KeinRezept(f"stop_reason={response.stop_reason}")
     return response.parsed_output
 
 
@@ -177,7 +190,7 @@ async def handle_suggest_recipe(args: dict) -> dict:
 
     try:
         _draft = await _generate_recipe(query)
-    except anthropic.APIError as exc:
+    except (anthropic.APIError, KeinRezept) as exc:
         log.exception("recipe generation failed")
         return {
             "ok": False,
@@ -268,7 +281,7 @@ async def handle_modify_recipe(args: dict, transport=None) -> dict:
     basis = _draft if _draft is not None else _saved[1]  # type: ignore[index]
     try:
         neu = await _generate_recipe(_aenderungs_prompt(basis, change))
-    except anthropic.APIError as exc:
+    except (anthropic.APIError, KeinRezept) as exc:
         log.exception("recipe modification failed")
         return {
             "ok": False,

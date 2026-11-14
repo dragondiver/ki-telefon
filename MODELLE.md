@@ -17,7 +17,7 @@ Gerät: kitelefon, `~/telefon-ai/.env` (geprüft 01.11.2026). `KITELEFON_SPRACHK
 | `realtime.py` `TRANSKRIPTIONS_MODELL` | Mitschrift der Gespräche für Protokoll und Auswertung | OpenAI | `gpt-transcribe` | wie Code | – |
 | `agents/websuche.py` | Schnelle Websuche mitten im Gespräch (Telefon und Elektra), Antwort in Sekunden | Anthropic | `claude-haiku-5-5` | wie Code | aus |
 | `agents/themenurteil.py` | Urteil, ob ein neuer Themenname zu einem vorhandenen Haushalts-Thema gehört | Anthropic | `claude-haiku-5-5` | wie Code | aus |
-| `agents/recipes.py` | Rezeptvorschlag im Gespräch, strukturiert, geht an mise-en-place | Anthropic | `claude-opus-4-7` | wie Code | nicht gesetzt |
-| `agents/erinnerung.py` | Nach dem Auflegen: was man sich vom Anrufer merkt | Anthropic | `claude-opus-4-7` | wie Code | nicht gesetzt |
+| `agents/recipes.py` | Rezeptvorschlag im Gespräch, strukturiert, geht an mise-en-place | Anthropic | `claude-opus-5-5` | wie Code | adaptiv (immer an), effort `low` |
+| `agents/erinnerung.py` | Nach dem Auflegen: was man sich vom Anrufer merkt | Anthropic | `claude-opus-5-5` | wie Code | adaptiv (immer an), effort `low` |
 | `scripts/ansagen_erzeugen.py` | Einmal-Job: Störungsansagen als Audio erzeugen (kein Laufzeitcode) | OpenAI TTS | `gpt-4o-mini-tts` | Abschaltung 06.01.2027; vor einem erneuten Lauf auf ein anderes Modell umstellen | – |
 | `scripts/werkzeugaufruf_probe.py` | Handmessung Werkzeugaufrufe (kein Laufzeitcode) | OpenAI Realtime | `gpt-realtime-2.1-mini` | – | – |
