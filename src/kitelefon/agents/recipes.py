@@ -22,6 +22,7 @@ from __future__ import annotations
 import logging
 import os
 from typing import Literal
+from urllib.parse import quote
 
 import anthropic
 import httpx
@@ -449,7 +450,9 @@ async def handle_similar_recipes(args: dict, transport=None) -> dict:
     recipe_id = str(args.get("recipe_id") or "").strip()
     if not recipe_id or "/" in recipe_id or ".." in recipe_id:
         return {"ok": False, "ack": "Zu welchem Rezept soll ich ähnliche suchen?"}
-    daten, fehler = await _kochbuch_get(f"/api/agent/recipes/{recipe_id}/similar", None, transport)
+    daten, fehler = await _kochbuch_get(
+        f"/api/agent/recipes/{quote(recipe_id, safe='')}/similar", None, transport
+    )
     if fehler:
         return fehler
     ergebnis = _treffer_ergebnis(daten, None)
@@ -458,21 +461,40 @@ async def handle_similar_recipes(args: dict, transport=None) -> dict:
     return ergebnis
 
 
+def _menge_text(amount, unit, name: str) -> str:
+    """'300 Gramm Hähnchen', 'Prise Salz' — wie _menge, aber aus der API-Form."""
+    try:
+        zahl = float(amount)
+        zahl = int(zahl) if zahl == int(zahl) else zahl
+    except (TypeError, ValueError):
+        zahl = None
+    if unit == "stueck":
+        einheit = ""
+    else:
+        einheit = _EINHEIT_LANG.get(unit, unit or "")
+    return " ".join(str(t) for t in (zahl, einheit, name) if t not in (None, ""))
+
+
 async def handle_read_recipe(args: dict, transport=None) -> dict:
     recipe_id = str(args.get("recipe_id") or "").strip()
     if not recipe_id or "/" in recipe_id or ".." in recipe_id:
         return {"ok": False, "ack": "Welches Rezept soll ich vorlesen?"}
-    daten, fehler = await _kochbuch_get(f"/api/agent/recipes/{recipe_id}", None, transport)
+    daten, fehler = await _kochbuch_get(
+        f"/api/agent/recipes/{quote(recipe_id, safe='')}", None, transport
+    )
     if fehler:
         return fehler
     zutaten = []
     for z in daten.get("ingredients") or []:
-        if not isinstance(z, dict) or not z.get("name"):
+        # Prisma-Form: {amount, unit, ingredient: {name, ...}}; amount ist ein
+        # Decimal und kommt als String ("300", "0.5").
+        if not isinstance(z, dict):
             continue
-        menge = z.get("amount")
-        einheit = _EINHEIT_LANG.get(z.get("unit"), z.get("unit") or "")
-        teile = [str(t) for t in (menge, einheit, z["name"]) if t not in (None, "")]
-        zutaten.append(" ".join(teile))
+        zutat = z.get("ingredient")
+        name = zutat.get("name") if isinstance(zutat, dict) else None
+        if not name:
+            continue
+        zutaten.append(_menge_text(z.get("amount"), z.get("unit"), name))
     minuten = [daten.get("prepTime"), daten.get("cookTime")]
     return {
         "ok": True,
@@ -482,5 +504,5 @@ async def handle_read_recipe(args: dict, transport=None) -> dict:
         if all(isinstance(m, int) for m in minuten)
         else None,
         "zutaten": zutaten,
-        "schritte": list(daten.get("instructions") or []),
+        "schritte": [str(t) for t in (daten.get("instructions") or [])],
     }

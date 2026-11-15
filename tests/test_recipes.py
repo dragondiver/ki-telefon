@@ -458,7 +458,29 @@ async def test_rezept_lesen():
         "prepTime": 10,
         "cookTime": 15,
         "instructions": ["Anbraten", "Kokosmilch dazu"],
-        "ingredients": [{"name": "Hähnchen", "amount": 300, "unit": "g"}],
+        "ingredients": [
+            {
+                "id": "x1",
+                "amount": "300",
+                "unit": "g",
+                "ingredientId": "i1",
+                "ingredient": {"id": "i1", "name": "Hähnchen"},
+            },
+            {
+                "id": "x2",
+                "amount": "0.5",
+                "unit": "l",
+                "ingredientId": "i2",
+                "ingredient": {"id": "i2", "name": "Kokosmilch"},
+            },
+            {
+                "id": "x3",
+                "amount": "2.00",
+                "unit": "stueck",
+                "ingredientId": "i3",
+                "ingredient": {"id": "i3", "name": "Zwiebeln"},
+            },
+        ],
     }
     transport, seen = _antwort(200, body)
 
@@ -466,7 +488,7 @@ async def test_rezept_lesen():
 
     assert seen[0].url.path == "/api/agent/recipes/abc"
     assert ergebnis["titel"] == "Curry" and ergebnis["minuten"] == 25
-    assert ergebnis["zutaten"] == ["300 Gramm Hähnchen"]
+    assert ergebnis["zutaten"] == ["300 Gramm Hähnchen", "0.5 Liter Kokosmilch", "2 Zwiebeln"]
     assert ergebnis["schritte"] == ["Anbraten", "Kokosmilch dazu"]
 
 
@@ -479,7 +501,7 @@ async def test_rezept_lesen():
         (recipes.handle_read_recipe, {"recipe_id": "a"}),
     ],
 )
-@pytest.mark.parametrize("status", [401, 404, 500])
+@pytest.mark.parametrize("status", [401, 403, 404, 500])
 async def test_fehlerstatus_geben_kurzes_ergebnis(handler, args, status):
     transport, _ = _antwort(status, {"error": "x"})
 
@@ -540,3 +562,15 @@ async def test_call_manager_leitet_die_werkzeuge_weiter(monkeypatch):
     for name in ("search_recipes", "similar_recipes", "read_recipe"):
         assert (await manager._tool_handler(name, {"x": name}))["ok"] is True
     assert len(gesehen) == 3
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("handler", [recipes.handle_read_recipe, recipes.handle_similar_recipes])
+async def test_recipe_id_wird_url_kodiert(handler):
+    transport, seen = _antwort(200, {"recipes": []})
+
+    await handler({"recipe_id": "a?b#c"}, transport=transport)
+
+    url = seen[0].url
+    assert url.raw_path.startswith(b"/api/agent/recipes/a%3Fb%23c")
+    assert not url.query
