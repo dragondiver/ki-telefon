@@ -382,14 +382,14 @@ td code { font: 400 .82rem/1.4 var(--f-mono); color: var(--tinte); white-space: 
       <div>
         <h2><span lang="de">Was die Figuren erledigen</span><span lang="en">What the characters can do</span></h2>
       </div>
-      <p class="satz"><span lang="de">Das Sprachmodell erkennt im Gespräch, was gewünscht ist, und ruft eines von 17 Werkzeugen auf. Ausgeführt wird der Aufruf von meinem Python-Code. Kurze Dinge passieren sofort, längere Aufgaben gehen in eine Warteschlange.</span><span lang="en">During the conversation the language model works out what is wanted and calls one of 17 tools. My Python code carries out the call. Short things happen right away, longer jobs go into a queue.</span></p>
+      <p class="satz"><span lang="de">Das Sprachmodell erkennt im Gespräch, was gewünscht ist, und ruft eines seiner Werkzeuge auf. Ausgeführt wird der Aufruf von meinem Python-Code. Kurze Dinge passieren sofort, längere Aufgaben gehen in eine Warteschlange.</span><span lang="en">During the conversation the language model works out what is wanted and calls one of its tools. My Python code carries out the call. Short things happen right away, longer jobs go into a queue.</span></p>
     </div>
     <ul class="werkzeuge">
       <li>
         <p class="etikett"><span lang="de">Musik</span><span lang="en">Music</span></p>
         <q><span lang="de">Spiel was von Queen.</span><span lang="en">Play something by Queen.</span></q>
         <p><span lang="de">Startet Spotify auf unserem Radio oder der Stereoanlage. Wir haben zwei Spotify-Konten; die Figur fragt beim Abheben, wer dran ist. Spotifys eigene Mixe wie die Daylist sind seit November 2024 für fremde Apps gesperrt, das sagt die Figur dann auch.</span><span lang="en">Starts Spotify on our radio or the stereo. We have two Spotify accounts, so the character asks who is calling. Spotify's own mixes such as the daylist have been closed to third-party apps since November 2024, and the character says so.</span></p>
-        <span class="fn">spotify_play · spotify_now_playing</span>
+        <span class="fn">spotify_play · spotify_now_playing · spotify_pause</span>
       </li>
       <li>
         <p class="etikett"><span lang="de">Einkaufsliste</span><span lang="en">Shopping list</span></p>
@@ -401,7 +401,7 @@ td code { font: 400 .82rem/1.4 var(--f-mono); color: var(--tinte); white-space: 
         <p class="etikett"><span lang="de">Rezepte</span><span lang="en">Recipes</span></p>
         <q><span lang="de">Schlag mir was für Pasta mit Spinat vor.</span><span lang="en">Suggest something with pasta and spinach.</span></q>
         <p><span lang="de">Claude schreibt ein vollständiges Rezept, die Figur liest eine Zusammenfassung vor. „Mit Knoblauch“ ändert es, „Ja, speichern“ legt es in der Haushalts-App ab.</span><span lang="en">Claude writes a complete recipe and the character reads out a summary. “With garlic” changes it, “Yes, save it” files it in the household app.</span></p>
-        <span class="fn">suggest_recipe · modify_recipe · confirm_recipe</span>
+        <span class="fn">suggest_recipe · modify_recipe · confirm_recipe · discard_recipe</span>
       </li>
       <li>
         <p class="etikett"><span lang="de">Wetter und Websuche</span><span lang="en">Weather and web search</span></p>
@@ -419,7 +419,7 @@ td code { font: 400 .82rem/1.4 var(--f-mono); color: var(--tinte); white-space: 
         <p class="etikett"><span lang="de">Aufgaben für später</span><span lang="en">Jobs for later</span></p>
         <q><span lang="de">Finde bis heute Abend heraus, wann der Wertstoffhof offen hat, und ruf mich zurück.</span><span lang="en">Find out by tonight when the recycling centre is open and call me back.</span></q>
         <p><span lang="de">Die Aufgabe kommt in eine Warteschlange, mein Haus-Agent arbeitet sie ab. Ist das Ergebnis da, klingelt das Telefon, und eine Figur liest es vor. Alternativ kommt es per Mail.</span><span lang="en">The job goes into a queue and my house agent works through it. When the result is ready, the phone rings and a character reads it out. It can also arrive by email.</span></p>
-        <span class="fn">delegate_task · zustellung_aendern</span>
+        <span class="fn">delegate_task · zustellung_aendern · ergebnis_per_mail</span>
       </li>
       <li>
         <p class="etikett"><span lang="de">Freisprechen</span><span lang="en">Speakerphone</span></p>
