@@ -1,10 +1,24 @@
 """Werkzeugaufrufe des Realtime-Modells ohne Telefonanruf pruefen (#111).
 
-Laesst die Rolle "Künstliche Intelligenz" gegen die OpenAI-Realtime-API laufen,
-mit TEXT statt Audio: Satz als Texteingabe, Antwort abwarten, auswerten, welches
-Werkzeug mit welchen Argumenten gerufen wurde und ob der Text eine Zusage
-("notiert") VOR dem Aufruf machte. Gemessen werden Prompt, Werkzeug-Schemas und
-Modell - nicht Spracherkennung und Raumakustik.
+Laesst die Werkzeug-Faelle mit der Rolle "Künstliche Intelligenz" gegen die
+OpenAI-Realtime-API laufen, mit TEXT statt Audio: Satz als Texteingabe, Antwort
+abwarten, auswerten, welches Werkzeug mit welchen Argumenten gerufen wurde und
+ob der Text eine Zusage ("notiert") VOR dem Aufruf machte. Gemessen werden
+Prompt, Werkzeug-Schemas und Modell - nicht Spracherkennung und Raumakustik.
+
+Laengen-Faelle (#24) messen statt eines Werkzeugaufrufs die Laenge der Antwort,
+mit anderen Rollen: `holger_bruchstuecke` schickt dem Schwaben (Holger) drei
+Bruchstuecke ("Hallo.", "Aehm.", "Ich moechte jetzt kurz was sagen."), richtig
+ist je Antwort hoechstens HOLGER_MAX_WOERTER Woerter. `marty_wo_wohnst_du` fragt
+den Verrueckten Professor (Marty) "Wo wohnst du?", richtig sind hoechstens
+MARTY_MAX_WOERTER Woerter. Die Woerter zaehlt der Code (woerter()), kein Modell.
+Mit `--ausfuehrlich` steht je Lauf die Wortzahl neben dem Text.
+
+Sprach-Fall (#22): `hein_kannst_du_hoeren` fragt den Hamburger (Hein) "Hein,
+kannst du mich gut hoeren?". Richtig ist eine Antwort ohne Treffer aus
+HEIN_FREMDWOERTER (typische daenische und englische Woerter, die im Deutschen
+und Plattdeutschen nicht vorkommen). Mit `--ausfuehrlich` stehen die Treffer
+je Lauf neben dem Text.
 
 Ein Fall kann aus mehreren Saetzen (Zuegen) bestehen: Zug 2 wird erst gesendet,
 wenn die Antwort auf Zug 1 samt Werkzeugaufrufen und Fake-Ergebnissen vollstaendig
@@ -20,6 +34,12 @@ nie in die Ausgabe:
 
     set -a; . ~/Development/telefon-ai/.env; set +a
     uv run python scripts/werkzeugaufruf_probe.py --wiederholungen 5
+
+Nur die Laengen- und Sprach-Faelle:
+
+    uv run python scripts/werkzeugaufruf_probe.py --fall holger_bruchstuecke \
+        --fall marty_wo_wohnst_du --fall hein_kannst_du_hoeren \
+        --wiederholungen 5 --ausfuehrlich
 
 Der Lauf kostet Geld (jeder Lauf ist ein paar Antworten des Realtime-Modells);
 `--max-laeufe` begrenzt die Gesamtzahl. Es gibt keine harte Schwelle: niedrige
@@ -56,6 +76,32 @@ RATENLIMIT_PAUSE_S = 10.0
 schlafe = asyncio.sleep  # austauschbar fuer Tests
 MAX_RUNDEN = 4  # Antwort -> Werkzeug -> Antwort ... ; Schutz gegen Endlosschleifen
 
+# Laengen-Faelle (#24): hoechstens so viele Woerter je Antwort gelten als richtig.
+# Startwerte vom 15.11.2026, zum Nachjustieren hier aendern.
+HOLGER_MAX_WOERTER = 15  # Antwort auf ein Bruchstueck
+MARTY_MAX_WOERTER = 30  # Antwort auf eine offene Frage
+
+# Sprach-Fall (#22): Hein antwortete am 14.11. mit "Hvis der skal noget dreje, saa bare
+# saeg til" und "no worries". Bewusst kurz und ohne Woerter, die im Deutschen oder
+# Plattdeutschen normal sind (Moin, jo, nee, wat, okay, sorry duerfen vorkommen).
+HEIN_FREMDWOERTER: tuple[str, ...] = (
+    # Daenisch
+    "jeg",
+    "hvis",
+    "skal",
+    "noget",
+    "ikke",
+    "hvad",
+    "så",
+    "bare",
+    # Englisch
+    "yes",
+    "no worries",
+    "of course",
+    "you know",
+    "sure",
+)
+
 # Vorhandenes Thema im Prompt, wie es das Telefon aus der Haushalts-DB baut.
 STARTTHEMEN = [("Urlaub Italien", ["Hotel in Rimini buchen.", "Sonnenhut einpacken."])]
 
@@ -79,6 +125,27 @@ def norm(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", ohne)
 
 
+def woerter(text: str) -> int:
+    """Woerter zaehlen: durch Leerraum getrennte Stuecke mit mindestens einem Buchstaben
+    oder einer Ziffer. "geht's" ist ein Wort, ein Gedankenstrich keins."""
+    return sum(1 for stueck in text.split() if re.search(r"\w", stueck))
+
+
+def fremdwort_treffer(text: str, liste: Sequence[str]) -> list[str]:
+    """Eintraege der Liste, die als ganze Woerter (bzw. Wortfolge) im Text stehen.
+
+    Gross/klein egal; "skal" trifft "Skal," aber nicht "Skala".
+    """
+    worte = re.findall(r"\w+", text.casefold())
+    treffer = []
+    for eintrag in liste:
+        teile = re.findall(r"\w+", eintrag.casefold())
+        n = len(teile)
+        if n and any(worte[i : i + n] == teile for i in range(len(worte) - n + 1)):
+            treffer.append(eintrag)
+    return treffer
+
+
 @dataclass(frozen=True)
 class Zug:
     """Ein Satz im Gespraech und was darauf erwartet wird."""
@@ -98,6 +165,23 @@ class Zug:
     # argument_verboten-Teilstrings (normalisiert) enthalten - sonst wurde still etwas angenommen.
     rueckfrage_ok: bool = False
     argument_verboten: tuple[str, ...] = ()
+    # Laengen-Fall (#24): kein Werkzeug erwartet, richtig = Antwort hat hoechstens so viele
+    # Woerter. Werkzeugaufrufe werden gezaehlt, aendern die Bewertung aber nicht.
+    max_woerter: int | None = None
+    # Sprach-Fall (#22): kein Werkzeug erwartet, richtig = keines dieser Woerter in der Antwort.
+    fremdwoerter: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if (self.max_woerter is not None or self.fremdwoerter) and self.erwartet is not None:
+            raise ValueError(f"Zug {self.satz!r}: Laengen-/Sprach-Zug erwartet kein Werkzeug")
+
+    @property
+    def erwartet_text(self) -> str:
+        if self.max_woerter is not None:
+            return f"≤{self.max_woerter} Wörter"
+        if self.fremdwoerter:
+            return "nur Deutsch"
+        return self.erwartet or "(keins)"
 
 
 @dataclass(frozen=True)
@@ -118,6 +202,8 @@ class Fall:
     hinweis: str = ""
     # Werkzeugname -> festes Ergebnis nur fuer diesen Fall (statt FAKE_ERGEBNISSE).
     fake_ergebnisse: dict[str, dict] = field(default_factory=dict)
+    # Rolle aus roles.py, deren Prompt der Fall bekommt.
+    rolle: str = ROLLE
     zuege: tuple[Zug, ...] = field(init=False, default=())
 
     def __post_init__(self) -> None:
@@ -134,7 +220,7 @@ class Fall:
     @property
     def erwartet_text(self) -> str:
         if len(self.zuege) == 1:
-            return self.zuege[0].erwartet or "(keins)"
+            return self.zuege[0].erwartet_text
         return f"{len(self.zuege)} Züge"
 
 
@@ -314,6 +400,35 @@ FAELLE: list[Fall] = [
     Fall("musik_aus", "Mach die Musik aus.", "spotify_pause"),
     # Gegenfall (#28, #24): ein "stopp" ohne Musik heisst aufhoeren zu reden.
     Fall("stopp_reden", "Stopp, lass mich mal reden.", None),
+    # #24: Holger setzte am 14.11. auf jedes Bruchstueck mit einer neuen langen Antwort an.
+    # Gemessen wird je Bruchstueck die Laenge der Antwort.
+    Fall(
+        "holger_bruchstuecke",
+        tuple(
+            Zug(satz, None, zusage_pruefen=False, max_woerter=HOLGER_MAX_WOERTER)
+            for satz in ("Hallo.", "Ähm.", "Ich möchte jetzt kurz was sagen.")
+        ),
+        rolle="Schwabe",
+    ),
+    # #24: Marty antwortete am 14.11. zu lang und nannte auf "Wo wohnst du?" keinen Ort.
+    Fall(
+        "marty_wo_wohnst_du",
+        [Zug("Wo wohnst du?", None, zusage_pruefen=False, max_woerter=MARTY_MAX_WOERTER)],
+        rolle="Verrückter Professor",
+    ),
+    # #22: Hein rutschte am 14.11. auf genau diese Frage ins Daenische und Englische.
+    Fall(
+        "hein_kannst_du_hoeren",
+        [
+            Zug(
+                "Hein, kannst du mich gut hören?",
+                None,
+                zusage_pruefen=False,
+                fremdwoerter=HEIN_FREMDWOERTER,
+            )
+        ],
+        rolle="Hamburger",
+    ),
     Fall("gegenprobe_smalltalk", "Hallo, wie geht’s?", None),
 ]
 
@@ -468,6 +583,22 @@ def bewerte_zug(zug: Zug, lauf: Lauf) -> Bewertung:
     namen = [n for n, _ in lauf.aufrufe]
     if zug.informativ:
         return Bewertung(True, False, False, False, False, informativ=True)
+    if zug.max_woerter is not None:
+        return Bewertung(
+            richtig=woerter(lauf.text_gesamt) <= zug.max_woerter,
+            werkzeug_gerufen=False,
+            falsches_werkzeug=bool(namen),
+            zusage_ohne_aufruf=False,
+            zusage_vor_aufruf=False,
+        )
+    if zug.fremdwoerter:
+        return Bewertung(
+            richtig=not fremdwort_treffer(lauf.text_gesamt, zug.fremdwoerter),
+            werkzeug_gerufen=False,
+            falsches_werkzeug=bool(namen),
+            zusage_ohne_aufruf=False,
+            zusage_vor_aufruf=False,
+        )
     if zug.erwartet is None:
         return Bewertung(
             richtig=not namen,
@@ -643,7 +774,7 @@ def tabelle(stats: list[FallStatistik]) -> str:
                         f" ({zs.laeufe - zs.fehler} Läufe, nicht gezählt)"
                     )
                 else:
-                    zeilen.append(_zeile(name, zs.zug.erwartet or "(keins)", zs.quote, zs, "", ""))
+                    zeilen.append(_zeile(name, zs.zug.erwartet_text, zs.quote, zs, "", ""))
     bewertet = [s for s in stats if s.fall.aussagekraeftig]
     laeufe = sum(s.laeufe for s in bewertet)
     zuege = sum(s.laeufe * len(s.fall.zuege) for s in bewertet)
@@ -655,7 +786,9 @@ def tabelle(stats: list[FallStatistik]) -> str:
         "(keins) = es darf kein Werkzeug kommen. inf. = informativ: Aufruf und Rückfrage beide zulässig,",
         "nur gezählt, in keiner Quote. n.b. = nicht bewertet. Wkz. = erwartetes Werkzeug gerufen,",
         "Argumente egal. falsch = anderes Werkzeug gerufen. Zus.o.A. = Zusage (notiert/erledigt ...)",
-        "ohne Aufruf. Zus.v.A. = Zusage VOR dem Aufruf.",
+        "ohne Aufruf. Zus.v.A. = Zusage VOR dem Aufruf. ≤N Wörter = Längen-Fall: richtig, wenn die",
+        "Antwort höchstens N Wörter hat (vom Code gezählt). nur Deutsch = Sprach-Fall: richtig, wenn",
+        "kein Wort aus der Fremdwortliste vorkommt. Bei beiden stehen Werkzeugaufrufe nur unter falsch.",
         f"Bewertete Läufe: {laeufe} (Züge: {zuege}). "
         f"Tokens aller Läufe: {sum(s.tokens_ein for s in stats)} ein / "
         f"{sum(s.tokens_aus for s in stats)} aus "
@@ -664,9 +797,15 @@ def tabelle(stats: list[FallStatistik]) -> str:
     return "\n".join(zeilen)
 
 
-def _zeile_aufrufe(lauf: Lauf) -> str:
+def _zeile_aufrufe(lauf: Lauf, zug: Zug | None = None) -> str:
     aufrufe = "; ".join(f"{n}({json.dumps(a, ensure_ascii=False)})" for n, a in lauf.aufrufe)
-    return f"Aufrufe: {aufrufe or '-'} | Text: {lauf.text_gesamt!r}"
+    zeile = f"Aufrufe: {aufrufe or '-'} | Text: {lauf.text_gesamt!r}"
+    if zug is not None and zug.max_woerter is not None:
+        zeile += f" | Wörter: {woerter(lauf.text_gesamt)} (höchstens {zug.max_woerter})"
+    if zug is not None and zug.fremdwoerter:
+        treffer = fremdwort_treffer(lauf.text_gesamt, zug.fremdwoerter)
+        zeile += f" | Treffer: {', '.join(treffer) or '-'}"
+    return zeile
 
 
 def zeile_lauf(fall: Fall, lauf: Lauf) -> str:
@@ -674,8 +813,11 @@ def zeile_lauf(fall: Fall, lauf: Lauf) -> str:
         return f"[{fall.name}] FEHLER {lauf.fehler}"
     laeufe = lauf.zug_laeufe()
     if len(laeufe) == 1:
-        return f"[{fall.name}] {_zeile_aufrufe(laeufe[0])}"
-    return "\n".join(f"[{fall.name} Z{i}] {_zeile_aufrufe(zl)}" for i, zl in enumerate(laeufe, 1))
+        return f"[{fall.name}] {_zeile_aufrufe(laeufe[0], fall.zuege[0])}"
+    return "\n".join(
+        f"[{fall.name} Z{i}] {_zeile_aufrufe(zl, zug)}"
+        for i, (zl, zug) in enumerate(zip(laeufe, fall.zuege, strict=False), 1)
+    )
 
 
 # --- Lauf gegen die API -------------------------------------------------------
@@ -857,11 +999,15 @@ async def probiere(
     parallel: int = 1,
     modell: str | None = None,
 ) -> list[tuple[Fall, Lauf]]:
-    rolle, prompt, werkzeuge = baue_prompt_und_werkzeuge()
-    modell = modell or rolle.get("model") or STANDARD_MODELL
+    # Je Rolle einmal Prompt, Werkzeuge und Modell bauen (Laengen- und Sprach-Faelle haben eigene).
+    je_rolle: dict[str, tuple[str, str, list]] = {}
+    for name in dict.fromkeys(f.rolle for f in faelle):
+        rolle, prompt, werkzeuge = baue_prompt_und_werkzeuge(name)
+        je_rolle[name] = (modell or rolle.get("model") or STANDARD_MODELL, prompt, werkzeuge)
     sem = asyncio.Semaphore(max(parallel, 1))
 
     async def einer(fall: Fall) -> tuple[Fall, Lauf]:
+        modell, prompt, werkzeuge = je_rolle[fall.rolle]
         async with sem:
             lauf = Lauf()
             for versuch in range(RATENLIMIT_VERSUCHE):

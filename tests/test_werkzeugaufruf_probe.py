@@ -690,3 +690,154 @@ def test_stopp_ohne_musik_erwartet_kein_werkzeug():
     fall = next(f for f in probe.FAELLE if f.name == "stopp_reden")
     assert fall.zuege[0].satz == "Stopp, lass mich mal reden."
     assert fall.zuege[0].erwartet is None
+
+
+# --- Laenge der Antwort (#24) und Sprache (#22) -----------------------------
+
+HOLGER = _fall("holger_bruchstuecke")
+MARTY = _fall("marty_wo_wohnst_du")
+HEIN = _fall("hein_kannst_du_hoeren")
+
+KURZ = "Ha no, was gibt's denn?"  # 5 Woerter
+LANG = " ".join(["Wort"] * 40)
+
+
+class AntwortTransport(FakeTransport):
+    """Antwortet je nach zuletzt gesendetem Satz; die Reihenfolge der Laeufe ist egal."""
+
+    def __init__(self, antworten_je_satz):
+        super().__init__([])
+        self.je_satz = antworten_je_satz
+
+    async def send(self, msg):
+        ev = json.loads(msg)
+        if ev["type"] == "response.create":
+            self.gesendet.append(ev)
+            satz = next(
+                e["item"]["content"][0]["text"]
+                for e in reversed(self.gesendet)
+                if e.get("item", {}).get("type") == "message"
+            )
+            self._queue.extend([text(self.je_satz[satz]), fertig()])
+        else:
+            await super().send(msg)
+
+
+def test_woerter_zaehlen():
+    assert probe.woerter(KURZ) == 5
+    assert probe.woerter("Moin — na, wie geht’s?") == 4
+    assert probe.woerter("") == 0
+    assert probe.woerter(LANG) == 40
+
+
+def test_laengen_faelle_sind_gueltig():
+    assert [z.satz for z in HOLGER.zuege] == ["Hallo.", "Ähm.", "Ich möchte jetzt kurz was sagen."]
+    assert all(z.max_woerter == probe.HOLGER_MAX_WOERTER == 15 for z in HOLGER.zuege)
+    assert [z.satz for z in MARTY.zuege] == ["Wo wohnst du?"]
+    assert MARTY.zuege[0].max_woerter == probe.MARTY_MAX_WOERTER == 30
+    for fall, gpt_style in ((HOLGER, "Holger"), (MARTY, "Marty"), (HEIN, "Hein")):
+        rolle = probe.rolle_nach_name(fall.rolle)
+        assert rolle is not None and gpt_style in rolle["gpt_style"]
+        assert all(z.erwartet is None for z in fall.zuege)
+    # Die bisherigen Faelle laufen weiter mit der KI-Rolle.
+    neu = {HOLGER.name, MARTY.name, HEIN.name}
+    assert all(f.rolle == probe.ROLLE for f in probe.FAELLE if f.name not in neu)
+    with pytest.raises(ValueError):
+        probe.Zug("x", "merke", max_woerter=5)
+
+
+def test_kurze_antwort_ist_richtig_lange_falsch():
+    kurz = probe.lauf_aus_ereignissen([text(KURZ), fertig()])
+    lang = probe.lauf_aus_ereignissen([text(LANG), fertig()])
+    assert probe.bewerte(MARTY, kurz).richtig
+    assert not probe.bewerte(MARTY, lang).richtig
+    s = probe.statistik([(MARTY, kurz), (MARTY, lang)])[0]
+    assert s.quote == "1/2"
+    assert "≤30 Wörter" in probe.tabelle([s])
+
+
+def test_holger_wird_je_bruchstueck_gemessen():
+    lauf = mehrzug([text(KURZ), fertig()], [text(LANG), fertig()], [text(KURZ), fertig()])
+    s = probe.statistik([(HOLGER, lauf)])[0]
+    assert [z.quote for z in s.zuege] == ["1/1", "0/1", "1/1"]
+    assert s.quote == "0/1"
+
+
+def test_werkzeugaufruf_aendert_laengenbewertung_nicht():
+    lauf = probe.lauf_aus_ereignissen([aufruf("web_suche", {"frage": "x"}), text(KURZ), fertig()])
+    b = probe.bewerte(MARTY, lauf)
+    assert b.richtig and b.falsches_werkzeug
+
+
+def test_fremdwort_treffer():
+    heins_antwort = (
+        "Ja, jegt kann di hören. Du klingst klar, no worries. "
+        "Hvis der skal noget dreje, så bare säg til."
+    )
+    treffer = probe.fremdwort_treffer(heins_antwort, probe.HEIN_FREMDWOERTER)
+    assert {"hvis", "skal", "noget", "så", "bare", "no worries"} <= set(treffer)
+    # Plattdeutsch und gaengige Lehnwoerter sind erlaubt; Teilwoerter treffen nicht.
+    platt = "Moin! Jo, dat hör ich gut. Nee, wat soll ich sagen, okay, sorry, die Skala passt."
+    assert probe.fremdwort_treffer(platt, probe.HEIN_FREMDWOERTER) == []
+    assert probe.fremdwort_treffer("Na, you know, Jung.", ["you know"]) == ["you know"]
+    assert probe.fremdwort_treffer("Weißt du, know-how.", ["you know"]) == []
+
+
+def test_hein_deutsch_ist_richtig_daenisch_falsch():
+    deutsch = probe.lauf_aus_ereignissen([text("Moin, jo, ich hör dich gut."), fertig()])
+    daenisch = probe.lauf_aus_ereignissen([text("Jo, hvis du vil, så bare sag til."), fertig()])
+    assert probe.bewerte(HEIN, deutsch).richtig
+    assert not probe.bewerte(HEIN, daenisch).richtig
+    s = probe.statistik([(HEIN, deutsch), (HEIN, daenisch)])[0]
+    assert s.quote == "1/2" and "nur Deutsch" in probe.tabelle([s])
+
+
+def test_main_neue_faelle_ausfuehrlich_mit_eigener_rolle(monkeypatch, capsys):
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    transporte = []
+    antworten = {
+        "Hallo.": KURZ,
+        "Ähm.": LANG,
+        "Ich möchte jetzt kurz was sagen.": KURZ,
+        "Wo wohnst du?": LANG,
+        "Hein, kannst du mich gut hören?": "Jo, klar, yes.",
+    }
+
+    async def verbinder(modell):
+        transporte.append(AntwortTransport(antworten))
+        return transporte[-1]
+
+    code = probe.main(
+        [
+            "--fall",
+            "holger_bruchstuecke",
+            "--fall",
+            "marty_wo_wohnst_du",
+            "--fall",
+            "hein_kannst_du_hoeren",
+            "--wiederholungen",
+            "1",
+            "--ausfuehrlich",
+        ],
+        verbinder=verbinder,
+    )
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "[holger_bruchstuecke Z1]" in out and "Wörter: 5 (höchstens 15)" in out
+    assert "[holger_bruchstuecke Z2]" in out and "Wörter: 40 (höchstens 15)" in out
+    assert "[marty_wo_wohnst_du]" in out and "Wörter: 40 (höchstens 30)" in out
+    assert "[hein_kannst_du_hoeren]" in out and "Treffer: yes" in out
+    zeilen = {z.split()[0]: z for z in out.splitlines() if z.split()}
+    assert zeilen["holger_bruchstuecke"].split()[3] == "0/1"
+    assert zeilen["marty_wo_wohnst_du"].split()[3] == "0/1"
+    assert zeilen["hein_kannst_du_hoeren"].split()[3] == "0/1"
+    # Jeder Fall bekam den Prompt seiner eigenen Figur.
+    prompts = [
+        next(e for e in t.gesendet if e["type"] == "session.update")["session"]["instructions"]
+        for t in transporte
+    ]
+    assert sorted(n for p in prompts for n in ("Holger", "Marty", "Hein") if n in p) == [
+        "Hein",
+        "Holger",
+        "Marty",
+    ]
