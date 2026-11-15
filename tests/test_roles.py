@@ -1,7 +1,7 @@
 # tests/test_roles.py
 import pytest
 
-from kitelefon.roles import DELEGATION_SUFFIX, ROLES, full_instructions, get_role
+from kitelefon.roles import DELEGATION_SUFFIX, ROLES, bote_rolle, full_instructions, get_role
 
 
 def test_roles_has_nine_entries():
@@ -65,6 +65,24 @@ def test_niemand_fragt_mehr_nach_dem_namen():
         assert "FRAG NICHT NACH DEM NAMEN" in text, r["name"]
         assert "Erfrage den Namen" not in text, r["name"]
         assert "weitere Informationen der Person" not in text, r["name"]
+
+
+def test_bruchstueck_regel_steht_bei_jeder_figur():
+    """#24: Holger antwortete am 15.11. in der Probe auf "Hallo." und "Ähm."
+    mit 17-37 Wörtern. Die Regel gilt für alle Figuren mit Telefon-Vorlage,
+    auch für den Boten beim Rückruf, und steht direkt unter ANTWORTE KURZ."""
+    rollen = [r for r in ROLES if not r.get("sprachkurs")]
+    rollen.append(bote_rolle("Fahrzeit?", "57 Minuten"))
+    for r in rollen:
+        text = full_instructions(r)
+        kurz = text.index("ANTWORTE KURZ")
+        bruch = text.index("BEI BRUCHSTÜCKEN WARTEST DU")
+        frage = text.index("HÖCHSTENS EINE FRAGE")
+        assert kurz < bruch < frage, r["name"]
+        assert '"Ja?"' in text, r["name"]
+        assert "Keine zweite Vorstellung" in text, r["name"]
+        # Die Vorstellung am Anfang des Anrufs bleibt.
+        assert "Stell dich im ersten Satz kurz vor" in text, r["name"]
 
 
 def test_kein_widerspruch_zwischen_fragen_und_nicht_fragen():
