@@ -412,7 +412,10 @@ ERINNERE_TOOL_SCHEMA: dict[str, Any] = {
     "type": "function",
     "name": "erinnere",
     "description": (
-        "Holt Notizen aus dem gemeinsamen Gedächtnis des Haushalts. Mit "
+        "Holt Notizen aus dem gemeinsamen Gedächtnis des Haushalts. Nur für "
+        "Notizen aus früheren Gesprächen. Fragen zum laufenden Gespräch "
+        "('Was hast du eben gesagt?', 'Wie hast du mich begrüßt?') "
+        "beantwortest du aus dem Gespräch selbst, ohne Werkzeug. Mit "
         "'thema' die Notizen dieses Themas, ohne Argument die Liste aller "
         "Themen. Rufe es auf, sobald eine Frage zu einem Thema der Liste im "
         "Prompt passt ('Was haben wir für Italien schon?'). Passt der Name "

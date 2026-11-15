@@ -392,6 +392,17 @@ def test_sagen_ist_nicht_tun_gilt_fuer_alle_rollen():
         assert "Erst wenn das Werkzeug geantwortet hat" in text, r["name"]
 
 
+def test_leeres_ergebnis_in_eigenen_worten_ohne_werkzeugnamen():
+    """#23: Die Figur sagte nach einem leeren erinnere den Werkzeugnamen an."""
+    for r in ROLES:
+        if r.get("sprachkurs"):
+            continue
+        text = full_instructions(r)
+        assert "Findet ein Werkzeug nichts, sag das in eigenen Worten" in text, r["name"]
+        assert "nenne dabei kein Werkzeug" in text, r["name"]
+        assert "Sprich nie über Werkzeuge" in text, r["name"]
+
+
 def test_die_regel_steht_nur_einmal():
     """Doppelt gepflegte Regeln laufen auseinander."""
     text = full_instructions(ROLES[0])

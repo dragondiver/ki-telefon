@@ -295,6 +295,15 @@ FAELLE: list[Fall] = [
         {"frage": "frankreich"},
         zusage_pruefen=False,
     ),
+    # #23: Eine Frage zum laufenden Gespraech ging an erinnere, danach nannte die
+    # Figur ihr Werkzeug. Richtig ist eine Antwort aus dem Gespraech, ohne Aufruf.
+    Fall(
+        "laufendes_gespraech",
+        (
+            Zug("Hallo, wie geht’s?", None, zusage_pruefen=False),
+            Zug("Was hast du eben gesagt?", None, zusage_pruefen=False),
+        ),
+    ),
     # Gegenprobe (#118): kein Land genannt, Nachfrage ist hier richtig. Aufruf oder
     # Rueckfrage beide zulaessig, nur gezaehlt (Zeile "Antwort" zeigt, was passierte).
     Fall(
