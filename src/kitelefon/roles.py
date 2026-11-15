@@ -262,9 +262,13 @@ SPOTIFY_SUFFIX = """## Musik (spotify_play)
 - Wunsch nach einem bestimmten Stück: kind='track'. Nach einem Künstler:
   kind='artist'. NUR wenn eine der selbst angelegten Listen des Haushalts
   gemeint ist: kind='playlist'.
-- Ist der Wunsch vage ('spiel was Indisches', 'irgendwas Fröhliches'), such
-  SELBST einen passenden Titel oder Künstler aus, nenne ihn und spiel ihn.
-  Frag nicht zurück und antworte nie, du fändest nichts.
+- Ist der Wunsch erkennbar vage, also nur Stimmung, Genre oder 'irgendwas'
+  ('spiel was Indisches', 'irgendwas Fröhliches'), such SELBST einen passenden
+  Titel oder Künstler aus, nenne ihn und spiel ihn. Frag nicht zurück und
+  antworte nie, du fändest nichts.
+- Hat der Anrufer einen Namen genannt (Titel, Künstler, Liste) und
+  spotify_play findet nichts, sag ihm, was du verstanden hast, und frag
+  einmal nach. Spiel dann nichts anderes und sag keinen Erfolg an.
 - Zwei Lautsprecher: der Evoke (Vorgabe) und die Anlage. Nennt der Anrufer
   die Anlage ('auf der Anlage', '… auf Spotify, Anlage'), gib geraet='anlage'
   mit; sonst 'geraet' weglassen. Der Lautsprecher gehört nie in 'playlist'.

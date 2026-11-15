@@ -77,6 +77,20 @@ def _auf_dem(geraet: str) -> str:
     return "auf " + _GERAET_WORTE.get(geraet, _GERAET_WORTE[STANDARD_GERAET])[1]
 
 
+# Findet Spotify zu einem Namen nichts, ist er meist falsch verstanden. Das
+# Modell soll dann nachfragen und nicht etwas anderes spielen und es als
+# Erfolg ansagen (#29).
+NICHTS_GEFUNDEN_HINWEIS = (
+    "Es läuft nichts. Hat der Anrufer diesen Namen genannt, sag ihm, was du "
+    "verstanden hast, und frag einmal nach. Spiel nichts anderes und sag "
+    "keinen Erfolg an."
+)
+
+
+def _nichts_gefunden(ack: str) -> dict:
+    return {"ok": False, "ack": ack, "hinweis": NICHTS_GEFUNDEN_HINWEIS}
+
+
 def _nicht_erreichbar(geraet: str, account: str) -> dict:
     """Das Gerät steht nicht in der Geräteliste dieses Kontos.
 
@@ -735,7 +749,7 @@ async def _play_artist(query: str, wer: str, geraet: str = STANDARD_GERAET) -> d
             except httpx.HTTPError as exc:
                 return {"ok": False, "ack": "Spotify antwortet gerade nicht.", "error": str(exc)}
             if treffer is None:
-                return {"ok": False, "ack": f"Ich finde keinen Künstler '{query}'."}
+                return _nichts_gefunden(f"Ich finde keinen Künstler '{query}'.")
             if not _passt_zum_wunsch(query, treffer["name"]):
                 log.info("artist search '%s' returned '%s' — nicht ähnlich genug", query, treffer)
                 return {
@@ -798,7 +812,7 @@ async def _play_track(query: str, wer: str, geraet: str = STANDARD_GERAET) -> di
             except httpx.HTTPError as exc:
                 return {"ok": False, "ack": "Spotify antwortet gerade nicht.", "error": str(exc)}
             if treffer is None:
-                return {"ok": False, "ack": f"Ich finde kein Stück '{query}'."}
+                return _nichts_gefunden(f"Ich finde kein Stück '{query}'.")
             # Spotify liefert zu fast allem einen ersten Song. Ohne diese
             # Pruefung lief zu "Evoke Play" der Titel "That Two Can Play".
             kandidaten = [treffer.get("name") or treffer.get("label", "")]
@@ -905,10 +919,7 @@ async def handle_spotify_play(args: dict) -> dict:
                     fallback = await versuch(wanted, wer, geraet)
                     if fallback.get("ok") or fallback.get("grund") == "geraet":
                         return fallback
-                return {
-                    "ok": False,
-                    "ack": (f"{matched.capitalize()}, ich finde nichts zu '{wanted}'."),
-                }
+                return _nichts_gefunden(f"{matched.capitalize()}, ich finde nichts zu '{wanted}'.")
             try:
                 ok = await acct.play_playlist(client, uri, device_name=GERAETE[geraet])
             except SpotifyAuthError as exc:
@@ -995,4 +1006,4 @@ async def handle_spotify_play(args: dict) -> dict:
                 f"am Rechner neu eingerichtet werden."
             ),
         }
-    return {"ok": False, "ack": f"Ich finde nichts zu '{wanted}'."}
+    return _nichts_gefunden(f"Ich finde nichts zu '{wanted}'.")
