@@ -271,6 +271,86 @@ DISCARD_RECIPE_TOOL_SCHEMA: dict[str, Any] = {
     "parameters": {"type": "object", "properties": {}, "required": []},
 }
 
+SEARCH_RECIPES_TOOL_SCHEMA: dict[str, Any] = {
+    "type": "function",
+    "name": "search_recipes",
+    "description": (
+        "Sucht in unserem Kochbuch (Mise-en-Place) nach schon gespeicherten "
+        "Rezepten. Aufrufen bei 'Haben wir ein Rezept mit Aubergine?', 'was "
+        "Schnelles aus dem Kochbuch'. NICHT für neue Vorschläge, die gehen an "
+        "suggest_recipe. Antwort: höchstens drei Treffer mit Titel und "
+        "Gesamtminuten, dazu die Zahl aller Treffer in 'gefunden'. Lies nur "
+        "Titel und Zeit vor. Die Hauptzutaten stehen im Ergebnis, nenne sie "
+        "aber nur, wenn der Anrufer danach fragt."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "q": {
+                "type": "string",
+                "description": (
+                    "Suchtext, meist eine Zutat oder ein Gericht: 'Aubergine', "
+                    "'Hähnchen', 'Curry'. Weglassen, wenn nur gefiltert wird."
+                ),
+            },
+            "filter": {
+                "type": "array",
+                "items": {"type": "string", "enum": ["quick", "proteinRich", "fiberRich"]},
+                "description": (
+                    "Optional: quick (höchstens 30 Minuten), proteinRich "
+                    "(eiweißreich), fiberRich (ballaststoffreich). Mehrere "
+                    "gelten zusammen."
+                ),
+            },
+        },
+        "required": [],
+    },
+}
+
+SIMILAR_RECIPES_TOOL_SCHEMA: dict[str, Any] = {
+    "type": "function",
+    "name": "similar_recipes",
+    "description": (
+        "Findet im Kochbuch Rezepte, die einem anderen ähneln. Aufrufen bei "
+        "'was Ähnliches wie das Curry'. Die recipe_id kommt aus einem "
+        "früheren search_recipes-Ergebnis; ohne id erst search_recipes "
+        "aufrufen. Antwort wie bei search_recipes: höchstens drei Treffer, "
+        "Titel und Zeit vorlesen, Hauptzutaten nur auf Nachfrage."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "recipe_id": {
+                "type": "string",
+                "description": "Die 'id' des Rezepts aus einem Suchergebnis.",
+            },
+        },
+        "required": ["recipe_id"],
+    },
+}
+
+READ_RECIPE_TOOL_SCHEMA: dict[str, Any] = {
+    "type": "function",
+    "name": "read_recipe",
+    "description": (
+        "Holt ein gespeichertes Rezept aus dem Kochbuch komplett mit Zutaten "
+        "und Schritten. NUR aufrufen, wenn der Anrufer das ganze Rezept "
+        "ausdrücklich hören will ('lies mir das vor', 'was brauche ich "
+        "dafür?'). Bei einer bloßen Suche reichen die Treffer. Vorlesen "
+        "Wort für Wort aus 'zutaten' und 'schritte', nichts dazuerfinden."
+    ),
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "recipe_id": {
+                "type": "string",
+                "description": "Die 'id' des Rezepts aus einem Suchergebnis.",
+            },
+        },
+        "required": ["recipe_id"],
+    },
+}
+
 ZUSTELLUNG_AENDERN_TOOL_SCHEMA = {
     "type": "function",
     "name": "zustellung_aendern",
@@ -480,6 +560,9 @@ ALL_TOOL_SCHEMAS = [
     CONFIRM_RECIPE_TOOL_SCHEMA,
     MODIFY_RECIPE_TOOL_SCHEMA,
     DISCARD_RECIPE_TOOL_SCHEMA,
+    SEARCH_RECIPES_TOOL_SCHEMA,
+    SIMILAR_RECIPES_TOOL_SCHEMA,
+    READ_RECIPE_TOOL_SCHEMA,
     WEB_SUCHE_TOOL_SCHEMA,
     MERKE_TOOL_SCHEMA,
     ERINNERE_TOOL_SCHEMA,

@@ -247,6 +247,13 @@ FAELLE: list[Fall] = [
         "merke",
         {"thema": "spanien"},
     ),
+    Fall(
+        "rezept_suchen_aubergine",
+        "Hab ich ein Rezept mit Aubergine?",
+        "search_recipes",
+        {"q": "aubergine"},
+        zusage_pruefen=False,
+    ),
     Fall("erinnere_italien", "Was haben wir für Italien schon?", "erinnere", zusage_pruefen=False),
     Fall(
         "einkaufsliste",
@@ -468,6 +475,18 @@ FAKE_ERGEBNISSE: dict[str, Callable[[dict], dict]] = {
     "confirm_recipe": lambda a: {"ok": True},
     "modify_recipe": lambda a: {"ok": True},
     "discard_recipe": lambda a: {"ok": True},
+    "search_recipes": lambda a: {
+        "ok": True,
+        "gefunden": 1,
+        "rezepte": [{"id": "r1", "titel": "Auberginen-Lasagne", "minuten": 60, "hauptzutaten": []}],
+    },
+    "similar_recipes": lambda a: {"ok": True, "gefunden": 0, "rezepte": []},
+    "read_recipe": lambda a: {
+        "ok": True,
+        "titel": "Auberginen-Lasagne",
+        "zutaten": [],
+        "schritte": [],
+    },
     "zustellung_aendern": lambda a: {"ok": True},
     "ergebnis_per_mail": lambda a: {"ok": True},
     "freisprechen": lambda a: {"ok": True},

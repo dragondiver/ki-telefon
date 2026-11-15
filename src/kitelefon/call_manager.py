@@ -17,6 +17,9 @@ from kitelefon.agents.recipes import (
     handle_confirm_recipe,
     handle_discard_recipe,
     handle_modify_recipe,
+    handle_read_recipe,
+    handle_search_recipes,
+    handle_similar_recipes,
     handle_suggest_recipe,
 )
 from kitelefon.agents.spotify import (
@@ -1474,6 +1477,12 @@ class CallManager:
             return await handle_modify_recipe(args)
         if name == "discard_recipe":
             return await handle_discard_recipe(args)
+        if name == "search_recipes":
+            return await handle_search_recipes(args)
+        if name == "similar_recipes":
+            return await handle_similar_recipes(args)
+        if name == "read_recipe":
+            return await handle_read_recipe(args)
         if name == "web_suche":
             return await handle_web_suche(args, zaehler=self._websuche_zaehler)
         if name in ("merke", "erinnere", "vergiss"):
