@@ -36,7 +36,9 @@ log = logging.getLogger(__name__)
 MODEL = "claude-opus-5-5"
 EFFORT = "low"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
-UNITS = Literal["g", "kg", "ml", "l", "stueck", "el", "tl", "prise", "bund", "dose", "packung"]
+UNITS = Literal[
+    "g", "kg", "ml", "l", "stueck", "el", "tl", "prise", "bund", "dose", "packung", "handvoll"
+]
 
 
 class Ingredient(BaseModel):
@@ -62,7 +64,7 @@ Familien-Rezepte für Mitteleuropa. Antworten knapp, präzise und gut umsetzbar.
 
 Regeln:
 - Mengen für die angegebene Anzahl Portionen
-- Zutaten mit Mengen + Einheit (g, kg, ml, l, stueck, el, tl, prise, bund, dose, packung)
+- Zutaten mit Mengen + Einheit (g, kg, ml, l, stueck, el, tl, prise, bund, dose, packung, handvoll)
 - 4–10 Zubereitungsschritte, jeweils ein klarer Satz
 - Tags als kurze Stichworte (z.B. 'vegetarisch', 'schnell', 'pasta')
 - Zeitangaben in Minuten, realistisch
@@ -114,6 +116,7 @@ _EINHEIT_LANG = {
     "bund": "Bund",
     "dose": "Dose",
     "packung": "Packung",
+    "handvoll": "Handvoll",
 }
 
 

@@ -86,6 +86,7 @@ ADD_SHOPPING_ITEM_TOOL_SCHEMA: dict[str, Any] = {
                     "bund",
                     "dose",
                     "packung",
+                    "handvoll",
                 ],
                 "description": "Einheit. Bei Stückzahlen 'stueck' verwenden.",
                 "default": "stueck",
