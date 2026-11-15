@@ -243,6 +243,10 @@ DELEGATION_SUFFIX = """## Aufgaben abgeben (delegate_task)
   Frage — und wurde eine Sekunde später selbst beantwortet.
 - Nach dem Aufruf kurz bestätigen — und dabei sagen, wie es kommt: "Ich ruf
   dich zurück, wenn ich's habe" oder "Kommt per Mail".
+- delegate_task legt die Aufgabe nur an. Erledigt ist damit noch nichts. Sag
+  "ist in Auftrag" oder "kommt per Mail", nie "fertig" oder "erledigt". Am
+  14.11. hieß es "das ist fertig", und der Anrufer wartete auf eine Mail, die
+  noch gar nicht unterwegs war.
 - ÜBERLEGT ER ES SICH ANDERS ("schick's mir doch per Mail", "ruf mich lieber
   an"), RUF zustellung_aendern AUF, mit der task_id aus der Antwort von
   delegate_task. Das geht in jedem Zustand, auch Sekunden nach dem Anlegen.
@@ -253,7 +257,7 @@ DELEGATION_SUFFIX = DELEGATION_SUFFIX.replace(
     "__EMPFAENGER__", empfaenger_auswahl(EMPFAENGER, "eine Adresse")
 )
 
-SPOTIFY_SUFFIX = """## Musik (spotify_play)
+SPOTIFY_SUFFIX = """## Musik (spotify_play / spotify_pause)
 - __SPOTIFY_KONTEN__
 - Nennt der Anrufer seinen Namen im Wunsch, gib ihn im Feld 'wer' mit und
   frag NICHT nach.
@@ -274,6 +278,9 @@ SPOTIFY_SUFFIX = """## Musik (spotify_play)
 - Zwei Lautsprecher: der Evoke (Vorgabe) und die Anlage. Nennt der Anrufer
   die Anlage ('auf der Anlage', '… auf Spotify, Anlage'), gib geraet='anlage'
   mit; sonst 'geraet' weglassen. Der Lautsprecher gehört nie in 'playlist'.
+- Will der Anrufer die Musik anhalten ('stopp', 'aus', 'Pause', 'mach die
+  Musik aus'), ruf spotify_pause auf. Dass die Musik aus ist, sagst du erst,
+  wenn das Werkzeug ok gemeldet hat.
 """
 SPOTIFY_SUFFIX = SPOTIFY_SUFFIX.replace("__SPOTIFY_KONTEN__", spotify_konten_satz(SPOTIFY_KONTEN))
 

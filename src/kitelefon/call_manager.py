@@ -19,7 +19,11 @@ from kitelefon.agents.recipes import (
     handle_modify_recipe,
     handle_suggest_recipe,
 )
-from kitelefon.agents.spotify import handle_spotify_now_playing, handle_spotify_play
+from kitelefon.agents.spotify import (
+    handle_spotify_now_playing,
+    handle_spotify_pause,
+    handle_spotify_play,
+)
 from kitelefon.agents.weather import handle_get_weather
 from kitelefon.agents.websuche import Tageszaehler, handle_web_suche
 from kitelefon.audio import (
@@ -1460,6 +1464,8 @@ class CallManager:
             return await handle_spotify_play(args)
         if name == "spotify_now_playing":
             return await handle_spotify_now_playing(args)
+        if name == "spotify_pause":
+            return await handle_spotify_pause(args)
         if name == "suggest_recipe":
             return await handle_suggest_recipe(args)
         if name == "confirm_recipe":

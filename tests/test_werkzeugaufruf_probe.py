@@ -676,3 +676,11 @@ def test_frage_zum_laufenden_gespraech_erwartet_keinen_aufruf():
     fall = next(f for f in probe.FAELLE if f.name == "laufendes_gespraech")
     assert [z.satz for z in fall.zuege][-1] == "Was hast du eben gesagt?"
     assert all(z.erwartet is None for z in fall.zuege)
+
+
+def test_musik_aus_erwartet_spotify_pause():
+    """#28: "Du kannst stoppen" wurde zugesagt, ohne dass ein Werkzeug lief."""
+    fall = next(f for f in probe.FAELLE if f.name == "musik_aus")
+    assert fall.zuege[0].satz == "Mach die Musik aus."
+    assert fall.zuege[0].erwartet == "spotify_pause"
+    assert probe.fake_ergebnis("spotify_pause", {})["ok"] is True

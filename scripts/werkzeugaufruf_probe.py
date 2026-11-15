@@ -310,6 +310,8 @@ FAELLE: list[Fall] = [
         "gegenprobe_spiel_gestern",
         [Zug("Wie ging das Spiel gestern aus?", None, informativ=True)],
     ),
+    # #28: "Du kannst stoppen" wurde als erledigt angesagt, ohne Aufruf.
+    Fall("musik_aus", "Mach die Musik aus.", "spotify_pause"),
     Fall("gegenprobe_smalltalk", "Hallo, wie geht’s?", None),
 ]
 
@@ -340,6 +342,7 @@ FAKE_ERGEBNISSE: dict[str, Callable[[dict], dict]] = {
     },
     "spotify_play": lambda a: {"ok": True, "spielt": a.get("query", "?")},
     "spotify_now_playing": lambda a: {"ok": True, "titel": "Nichts läuft gerade."},
+    "spotify_pause": lambda a: {"ok": True, "ack": "Die Musik ist aus."},
     "suggest_recipe": lambda a: {"ok": True, "rezept": "Entwurf liegt vor."},
     "confirm_recipe": lambda a: {"ok": True},
     "modify_recipe": lambda a: {"ok": True},
