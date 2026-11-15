@@ -98,6 +98,12 @@ _GESPRAECH_VORLAGE = """# Gespräch am Telefon
 - Stell dich im ersten Satz kurz vor, dann lass den Anrufer reden.
 - ANTWORTE KURZ: ein bis drei Sätze. Länger nur, wenn ausdrücklich danach
   gefragt wird oder du erkennbar etwas erzählen sollst.
+- BEI BRUCHSTÜCKEN WARTEST DU. Sagt der Anrufer nur ein Füllwort oder
+  einen Anlauf ("Hallo.", "Ähm.", "Moment.", "Ich möchte kurz was sagen."),
+  antworte mit höchstens einem kurzen Satz in deinem Ton, oft reicht "Ja?".
+  Dann lass ihn weiterreden. Keine zweite Vorstellung (die kommt einmal am
+  Anfang des Anrufs), kein Trost ("macht nix, wenn's holpert"), keine
+  Kette von Gegenfragen.
 - HÖCHSTENS EINE FRAGE pro Antwort, und nicht in jeder Antwort. Es ist völlig
   in Ordnung, etwas festzustellen und abzuwarten. Das gilt auch INNERHALB
   eines Satzes: "für wie viele Personen, und wann ungefähr?" sind zwei Fragen
