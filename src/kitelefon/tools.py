@@ -179,6 +179,21 @@ SPOTIFY_NOW_PLAYING_TOOL_SCHEMA: dict[str, Any] = {
     },
 }
 
+SPOTIFY_PAUSE_TOOL_SCHEMA: dict[str, Any] = {
+    "type": "function",
+    "name": "spotify_pause",
+    "description": (
+        "Hält die Musik an, die gerade auf Spotify läuft, egal über welches "
+        "Konto. Nur aufrufen, wenn sich der Satz erkennbar auf die Musik "
+        "bezieht: 'Musik aus', 'stopp die Musik', 'mach die Musik aus', oder "
+        "'Pause', wenn Musik läuft oder gerade gewünscht wurde. Ein 'stopp' "
+        "ohne Bezug zur Musik heißt: aufhören zu reden, kein Werkzeug. Sag "
+        "erst nach ok, dass die Musik aus ist. Meldet das Werkzeug, dass "
+        "nichts läuft, oder einen Fehler, sag genau das."
+    ),
+    "parameters": {"type": "object", "properties": {}, "required": []},
+}
+
 SUGGEST_RECIPE_TOOL_SCHEMA: dict[str, Any] = {
     "type": "function",
     "name": "suggest_recipe",
@@ -460,6 +475,7 @@ ALL_TOOL_SCHEMAS = [
     ADD_SHOPPING_ITEM_TOOL_SCHEMA,
     SPOTIFY_PLAY_TOOL_SCHEMA,
     SPOTIFY_NOW_PLAYING_TOOL_SCHEMA,
+    SPOTIFY_PAUSE_TOOL_SCHEMA,
     SUGGEST_RECIPE_TOOL_SCHEMA,
     CONFIRM_RECIPE_TOOL_SCHEMA,
     MODIFY_RECIPE_TOOL_SCHEMA,
@@ -509,7 +525,12 @@ def handle_delegate_task(raw_args: dict[str, Any], queue: TaskSink) -> dict[str,
     return {
         "ok": True,
         "task_id": task_id,
-        "ack": f"Notiert. Du bekommst das Ergebnis {_wohin(args.deliver_via)}.",
+        # Nur angelegt, nicht erledigt. Auf "Notiert. Du bekommst das
+        # Ergebnis …" sagte die Rolle am 14.11.2026 "das ist fertig" (#28).
+        "ack": (
+            f"Aufgabe ist angelegt und in Arbeit. Das Ergebnis kommt später "
+            f"{_wohin(args.deliver_via)}."
+        ),
     }
 
 

@@ -585,6 +585,29 @@ class SpotifyAccount:
             "is_playing": data.get("is_playing", False),
         }
 
+    async def pause(self, client: httpx.AsyncClient) -> bool:
+        """Wiedergabe dieses Kontos anhalten und nachmessen.
+
+        True, wenn der Player danach steht. Wie beim Starten zählt nicht der
+        Statuscode, sondern was /me/player/currently-playing danach meldet.
+        Ein Fehler beim PUT (z. B. 403, 404) wird als httpx.HTTPStatusError
+        weitergereicht.
+        """
+        r = await client.put(
+            f"{API}/me/player/pause", headers=await self._headers(client), timeout=15
+        )
+        if r.status_code >= 400:
+            log.error("[%s] pause failed: %s %s", self.account, r.status_code, r.text)
+            r.raise_for_status()
+        for _ in range(VERIFY_ATTEMPTS):
+            await asyncio.sleep(VERIFY_WAIT)
+            info = await self.currently_playing(client)
+            if info is None or not info.get("is_playing"):
+                log.info("[%s] paused", self.account)
+                return True
+        log.error("[%s] Spotify hat die Pause nicht angenommen, Player spielt weiter", self.account)
+        return False
+
     async def play_uris(
         self,
         client: httpx.AsyncClient,
@@ -710,6 +733,73 @@ async def handle_spotify_now_playing(args: dict) -> dict:
             ),
         }
     return {"ok": False, "ack": "Gerade läuft nichts."}
+
+
+# Läuft auf Spotify nichts, kann die Musik im Raum trotzdem laufen, etwa vom
+# Radio. Dann darf das Modell nicht "ist aus" sagen (#28).
+NICHTS_ZU_PAUSIEREN_HINWEIS = (
+    "Auf Spotify läuft nichts, angehalten wurde nichts. Sag das so und "
+    "behaupte nicht, du hättest die Musik ausgemacht."
+)
+
+
+async def handle_spotify_pause(args: dict) -> dict:
+    """Musik anhalten (#28).
+
+    Fragt jedes eingerichtete Konto wie handle_spotify_now_playing und hält
+    jedes an, auf dem gerade etwas läuft. Wer anruft, spielt keine Rolle:
+    angehalten wird die Musik, die im Raum läuft, egal über wessen Konto.
+    """
+    angehalten: list[str] = []
+    abgelehnt: list[str] = []
+    abgemeldet: list[str] = []
+    fehler: list[str] = []
+    async with httpx.AsyncClient() as client:
+        for name in KNOWN_ACCOUNTS:
+            try:
+                acct = _get_account(name)
+            except FileNotFoundError:
+                continue
+            try:
+                info = await acct.currently_playing(client)
+                if info is None or not info.get("is_playing"):
+                    continue
+                if await acct.pause(client):
+                    angehalten.append(name)
+                else:
+                    abgelehnt.append(name)
+            except SpotifyAuthError:
+                abgemeldet.append(name)
+            except httpx.HTTPError as exc:
+                log.warning("spotify_pause failed for %s: %s", name, exc)
+                fehler.append(f"{name}: {exc}")
+    if angehalten and not abgelehnt:
+        ergebnis: dict = {"ok": True, "ack": "Die Musik ist aus."}
+        if fehler:
+            ergebnis["error"] = "; ".join(fehler)
+        return ergebnis
+    if abgelehnt:
+        return {"ok": False, "ack": "Spotify hat die Pause nicht angenommen, die Musik läuft noch."}
+    if fehler:
+        return {
+            "ok": False,
+            "ack": "Spotify antwortet gerade nicht, ich konnte die Musik nicht anhalten.",
+            "error": "; ".join(fehler),
+        }
+    if abgemeldet:
+        wessen = " und ".join(n.capitalize() for n in abgemeldet)
+        return {
+            "ok": False,
+            "ack": (
+                f"Die Spotify-Anmeldung für {wessen} ist abgelaufen, ich kann die "
+                f"Musik nicht anhalten."
+            ),
+        }
+    return {
+        "ok": False,
+        "ack": "Auf Spotify läuft gerade nichts.",
+        "hinweis": NICHTS_ZU_PAUSIEREN_HINWEIS,
+    }
 
 
 def _format_now_playing(info: dict, playing: bool = True) -> dict:
