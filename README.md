@@ -313,10 +313,14 @@ CI und nicht per Cron (Entscheidung in #111). Der Schlüssel kommt aus der
 Umgebung, nie in Repo oder Ausgabe:
 
 ```bash
-set -a; . ~/Development/telefon-ai/.env; set +a
-uv run python scripts/werkzeugaufruf_probe.py --wiederholungen 5
+set -a; . ~/Development/ki-telefon/.env; set +a
+uv run python scripts/werkzeugaufruf_probe.py --wiederholungen 3
 # --fall NAME (mehrfach), --ausfuehrlich (Aufrufe und Text je Lauf), --max-laeufe 100
 ```
+
+Fälle mal Wiederholungen müssen höchstens `--max-laeufe` (Standard 100) ergeben,
+sonst bricht das Skript ab, ohne etwas zu senden. Bei 24 Fällen sind 3
+Wiederholungen 72 Läufe; für mehr Wiederholungen `--max-laeufe` ausdrücklich angeben.
 
 Die Fälle stehen als Liste `FAELLE` im Skript. Ausgabe: Quote je Fall und je Zug,
 „Zusage ohne Aufruf“, Tokens und Laufzeit; keine Schwelle, Exit-Code nur bei
