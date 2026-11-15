@@ -301,3 +301,45 @@ async def test_abgelehntes_rezept_legt_das_gespraech_nicht_lahm(monkeypatch):
     )
     ergebnis = await recipes.handle_suggest_recipe({"query": "Kichererbsen mit Spinat"})
     assert ergebnis["ok"] is False
+
+
+# --- Einheit Handvoll (#4) ------------------------------------------------
+
+
+def test_handvoll_wird_als_einheit_angenommen():
+    from kitelefon.agents.recipes import Ingredient
+
+    assert Ingredient(name="Parmesan", amount=2, unit="handvoll").unit == "handvoll"
+
+
+@pytest.mark.asyncio
+async def test_handvoll_wird_vorgelesen(monkeypatch):
+    """Handvoll hat keinen Plural: 'zwei Handvoll Parmesan'."""
+    from kitelefon.agents.recipes import Ingredient
+
+    async def erzeuge(query):
+        return _rezept(ingredients=[Ingredient(name="Parmesan", amount=2, unit="handvoll")])
+
+    monkeypatch.setattr(recipes, "_generate_recipe", erzeuge)
+
+    zutaten = (await recipes.handle_suggest_recipe({"query": "x"}))["zutaten"]
+
+    assert zutaten == ["2 Handvoll Parmesan"]
+
+
+def test_einheiten_stimmen_ueberall_ueberein():
+    """Die Einheitenliste steht an vier Stellen: Literal, Prompt,
+    Sprechformen und das Werkzeug fuer die Einkaufsliste. Fehlt eine
+    Einheit an einer Stelle, kann das Telefon sie nicht benutzen (#4)."""
+    import typing
+
+    from kitelefon.tools import ADD_SHOPPING_ITEM_TOOL_SCHEMA
+
+    einheiten = set(typing.get_args(recipes.UNITS))
+    werkzeug = ADD_SHOPPING_ITEM_TOOL_SCHEMA["parameters"]["properties"]["unit"]["enum"]
+
+    assert "handvoll" in einheiten
+    assert set(werkzeug) == einheiten
+    assert set(recipes._EINHEIT_LANG) == einheiten
+    for einheit in einheiten:
+        assert einheit in recipes.SYSTEM_PROMPT
