@@ -126,8 +126,9 @@ SPOTIFY_PLAY_TOOL_SCHEMA: dict[str, Any] = {
                     "Wonach gesucht wird: bei kind='track' der Titel (gern "
                     "mit Künstler, z.B. 'Kesariya Arijit Singh'), bei "
                     "kind='artist' der Künstlername, bei kind='playlist' "
-                    "Name oder Namensteil der Playlist. Ohne Gerätenamen: "
-                    "aus 'spiel die Abendliste auf dem Evoke' wird 'Abendliste'."
+                    "Name oder Namensteil der Playlist. Übergib den Namen, den "
+                    "der Anrufer genannt hat, ohne Füllwörter wie 'spiel', "
+                    "'auf Spotify' oder den Lautsprecher."
                 ),
             },
             "kind": {
