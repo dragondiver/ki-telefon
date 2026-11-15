@@ -32,8 +32,12 @@ Von Hand auf dem Mac, nicht in der CI, nicht per Cron (Entscheidung 09.10.2026).
 Der Schluessel kommt aus der Umgebung (OPENAI_API_KEY), nie aus dem Repo und
 nie in die Ausgabe:
 
-    set -a; . ~/Development/telefon-ai/.env; set +a
-    uv run python scripts/werkzeugaufruf_probe.py --wiederholungen 5
+    set -a; . ~/Development/ki-telefon/.env; set +a
+    uv run python scripts/werkzeugaufruf_probe.py --wiederholungen 3
+
+Faelle mal Wiederholungen muessen <= `--max-laeufe` (Standard 100) bleiben, sonst
+bricht das Skript ab, ohne etwas zu senden. Bei 24 Faellen sind das 72 Laeufe;
+fuer mehr Wiederholungen `--max-laeufe` ausdruecklich angeben.
 
 Nur die Laengen- und Sprach-Faelle:
 
@@ -1045,7 +1049,7 @@ async def probiere(
 KEIN_SCHLUESSEL = (
     "OPENAI_API_KEY ist nicht gesetzt. Es wurde nichts gesendet.\n"
     "Schlüssel nur über die Umgebung laden, ohne ihn auszugeben:\n"
-    "  set -a; . ~/Development/telefon-ai/.env; set +a"
+    "  set -a; . ~/Development/ki-telefon/.env; set +a"
 )
 
 
