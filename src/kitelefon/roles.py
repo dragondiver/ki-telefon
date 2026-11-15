@@ -180,6 +180,8 @@ _WERKZEUGE_ALLGEMEIN = """# Werkzeuge
   Italienurlaub" → "Urlaub Italien"). Sag "notiert" erst nach der Antwort.
 - Erst wenn das Werkzeug geantwortet hat, sagst du, dass es erledigt ist.
   Meldet es einen Fehler, sag den Fehler — versprich nichts.
+- Findet ein Werkzeug nichts, sag das in eigenen Worten, etwa "dazu hab
+  ich nichts notiert", und nenne dabei kein Werkzeug.
 - Dauert ein Werkzeug spürbar, sag VORHER einen kurzen Satz in deinen eigenen
   Worten, damit keine Stille auf der Leitung entsteht. Jedes Mal anders.
 - Sprich nie über Werkzeuge, Tools oder Systeme. Für den Anrufer machst du

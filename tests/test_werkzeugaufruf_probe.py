@@ -669,3 +669,10 @@ def test_fall_eigene_fakes_gehen_an_das_modell():
     assert json.loads(out["item"]["output"]) == GEDAECHTNIS.fake_ergebnisse["erinnere"]
     # Ohne eigene Fakes bleibt das allgemeine Ergebnis.
     assert "Sonnencreme kaufen." not in probe.fake_ergebnis("erinnere", {})["notizen"]
+
+
+def test_frage_zum_laufenden_gespraech_erwartet_keinen_aufruf():
+    """#23: Zug 2 fragt nach dem eben Gesagten, richtig ist kein Werkzeug."""
+    fall = next(f for f in probe.FAELLE if f.name == "laufendes_gespraech")
+    assert [z.satz for z in fall.zuege][-1] == "Was hast du eben gesagt?"
+    assert all(z.erwartet is None for z in fall.zuege)

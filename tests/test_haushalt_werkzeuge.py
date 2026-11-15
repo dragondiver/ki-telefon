@@ -48,6 +48,15 @@ def test_beschreibungen_tragen_die_verhaltensregeln():
     assert "delegate_task" in _schema("web_suche")["description"]
 
 
+def test_erinnere_nur_fuer_fruehere_gespraeche():
+    """#23: 'Was hast du eben gesagt?' ging an erinnere statt ins Gespräch."""
+    beschreibung = _schema("erinnere")["description"]
+    assert "Nur für Notizen aus früheren Gesprächen" in beschreibung
+    assert "'Was hast du eben gesagt?'" in beschreibung
+    assert "'Wie hast du mich begrüßt?'" in beschreibung
+    assert "aus dem Gespräch selbst, ohne Werkzeug" in beschreibung
+
+
 def test_web_suche_kuendigt_sich_mit_moment_an():
     """#128: Ohne Ansage blieben vor dem Ergebnis rund 3,5 s Stille auf der Leitung."""
     beschreibung = _schema("web_suche")["description"]
