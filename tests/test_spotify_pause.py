@@ -152,8 +152,14 @@ def test_schema_im_katalog_und_im_werkzeugdienst():
     assert "spotify_pause" in FERN_WERKZEUGE
     assert SPOTIFY_PAUSE_TOOL_SCHEMA["parameters"]["required"] == []
     beschreibung = SPOTIFY_PAUSE_TOOL_SCHEMA["description"]
-    assert "'mach die Musik aus'" in beschreibung
+    for satz in ("'Musik aus'", "'stopp die Musik'", "'mach die Musik aus'"):
+        assert satz in beschreibung
+    assert "Nur aufrufen, wenn sich der Satz erkennbar auf die Musik" in beschreibung
+    assert "'Pause', wenn Musik läuft oder gerade gewünscht wurde" in beschreibung
+    assert "'stopp' ohne Bezug zur Musik heißt: aufhören zu reden, kein Werkzeug" in beschreibung
     assert "erst nach ok" in beschreibung
+    # Ein nacktes 'stopp' ist kein Ausloeser mehr (#24: so unterbrechen Anrufer).
+    assert "'stopp'," not in beschreibung
 
 
 @pytest.mark.asyncio
@@ -185,10 +191,20 @@ async def test_call_manager_fertigt_spotify_pause_ab(monkeypatch, tmp_path):
 def test_spotify_abschnitt_nennt_pause_und_ok():
     suffix = roles.SPOTIFY_SUFFIX
     assert suffix.startswith("## Musik (spotify_play / spotify_pause)")
-    for wort in ("'stopp'", "'aus'", "'Pause'", "'mach die\n  Musik aus'"):
-        assert wort in suffix
-    assert "ruf spotify_pause auf" in suffix
-    assert "erst,\n  wenn das Werkzeug ok gemeldet hat" in suffix
+    for satz in ("'Musik aus'", "'stopp die Musik'", "'mach die Musik aus'"):
+        assert satz in suffix
+    assert "erkennbar die Musik anhalten, ruf spotify_pause auf" in suffix
+    assert "'Pause', wenn\n  Musik läuft oder er sich gerade Musik gewünscht hat" in suffix
+    assert "sagst du erst, wenn das Werkzeug ok gemeldet hat" in suffix
+
+
+def test_stopp_ohne_musik_heisst_aufhoeren_zu_reden():
+    """#24: Anrufer unterbrechen die Figur mit "stopp" oder "Hallo, stopp"."""
+    suffix = roles.SPOTIFY_SUFFIX
+    assert "Ein 'stopp' ohne Bezug zur Musik" in suffix
+    assert "hör auf zu reden und lass den Anrufer sprechen" in suffix
+    assert "du kein Werkzeug auf" in suffix
+    assert "('stopp', 'aus'" not in suffix
 
 
 def test_jede_rolle_mit_spotify_kennt_spotify_pause():

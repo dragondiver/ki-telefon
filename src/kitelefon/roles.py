@@ -278,9 +278,13 @@ SPOTIFY_SUFFIX = """## Musik (spotify_play / spotify_pause)
 - Zwei Lautsprecher: der Evoke (Vorgabe) und die Anlage. Nennt der Anrufer
   die Anlage ('auf der Anlage', '… auf Spotify, Anlage'), gib geraet='anlage'
   mit; sonst 'geraet' weglassen. Der Lautsprecher gehört nie in 'playlist'.
-- Will der Anrufer die Musik anhalten ('stopp', 'aus', 'Pause', 'mach die
-  Musik aus'), ruf spotify_pause auf. Dass die Musik aus ist, sagst du erst,
-  wenn das Werkzeug ok gemeldet hat.
+- Will der Anrufer erkennbar die Musik anhalten, ruf spotify_pause auf:
+  'Musik aus', 'stopp die Musik', 'mach die Musik aus', oder 'Pause', wenn
+  Musik läuft oder er sich gerade Musik gewünscht hat. Dass die Musik aus ist,
+  sagst du erst, wenn das Werkzeug ok gemeldet hat.
+- Ein 'stopp' ohne Bezug zur Musik ('Stopp, lass mich mal reden', 'Hallo,
+  stopp') heißt: hör auf zu reden und lass den Anrufer sprechen. Dafür rufst
+  du kein Werkzeug auf.
 """
 SPOTIFY_SUFFIX = SPOTIFY_SUFFIX.replace("__SPOTIFY_KONTEN__", spotify_konten_satz(SPOTIFY_KONTEN))
 

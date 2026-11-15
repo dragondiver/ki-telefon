@@ -312,6 +312,8 @@ FAELLE: list[Fall] = [
     ),
     # #28: "Du kannst stoppen" wurde als erledigt angesagt, ohne Aufruf.
     Fall("musik_aus", "Mach die Musik aus.", "spotify_pause"),
+    # Gegenfall (#28, #24): ein "stopp" ohne Musik heisst aufhoeren zu reden.
+    Fall("stopp_reden", "Stopp, lass mich mal reden.", None),
     Fall("gegenprobe_smalltalk", "Hallo, wie geht’s?", None),
 ]
 

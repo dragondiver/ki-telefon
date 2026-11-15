@@ -184,10 +184,12 @@ SPOTIFY_PAUSE_TOOL_SCHEMA: dict[str, Any] = {
     "name": "spotify_pause",
     "description": (
         "Hält die Musik an, die gerade auf Spotify läuft, egal über welches "
-        "Konto. Aufrufen, wenn der Anrufer die Musik anhalten will: 'stopp', "
-        "'aus', 'Pause', 'mach die Musik aus' o.ä. Sag erst nach ok, dass die "
-        "Musik aus ist. Meldet das Werkzeug, dass nichts läuft, oder einen "
-        "Fehler, sag genau das."
+        "Konto. Nur aufrufen, wenn sich der Satz erkennbar auf die Musik "
+        "bezieht: 'Musik aus', 'stopp die Musik', 'mach die Musik aus', oder "
+        "'Pause', wenn Musik läuft oder gerade gewünscht wurde. Ein 'stopp' "
+        "ohne Bezug zur Musik heißt: aufhören zu reden, kein Werkzeug. Sag "
+        "erst nach ok, dass die Musik aus ist. Meldet das Werkzeug, dass "
+        "nichts läuft, oder einen Fehler, sag genau das."
     ),
     "parameters": {"type": "object", "properties": {}, "required": []},
 }

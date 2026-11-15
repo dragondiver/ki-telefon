@@ -684,3 +684,9 @@ def test_musik_aus_erwartet_spotify_pause():
     assert fall.zuege[0].satz == "Mach die Musik aus."
     assert fall.zuege[0].erwartet == "spotify_pause"
     assert probe.fake_ergebnis("spotify_pause", {})["ok"] is True
+
+
+def test_stopp_ohne_musik_erwartet_kein_werkzeug():
+    fall = next(f for f in probe.FAELLE if f.name == "stopp_reden")
+    assert fall.zuege[0].satz == "Stopp, lass mich mal reden."
+    assert fall.zuege[0].erwartet is None
