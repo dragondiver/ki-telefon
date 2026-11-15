@@ -343,3 +343,234 @@ def test_einheiten_stimmen_ueberall_ueberein():
     assert set(recipes._EINHEIT_LANG) == einheiten
     for einheit in einheiten:
         assert einheit in recipes.SYSTEM_PROMPT
+
+
+# --- Kochbuch durchsuchen (#39) -----------------------------------------------
+# Antwortform nach docs/agent-api.md in mise-en-place.
+
+KURZFORM = {
+    "id": "8c1f",
+    "title": "Coq au Riesling",
+    "mainIngredients": ["Hähnchen", "Kartoffel"],
+    "totalMinutes": 90,
+    "servings": 4,
+}
+
+
+def _kurz(i):
+    return {**KURZFORM, "id": f"id{i}", "title": f"Rezept {i}"}
+
+
+def _antwort(status, body):
+    seen = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(status, json=body)
+
+    return httpx.MockTransport(handler), seen
+
+
+@pytest.mark.asyncio
+async def test_suche_vertrag_und_anfrage():
+    transport, seen = _antwort(200, {"total": 1, "recipes": [KURZFORM]})
+
+    ergebnis = await recipes.handle_search_recipes(
+        {"q": "Hähnchen", "filter": ["quick", "vegan"]}, transport=transport
+    )
+
+    r = seen[0]
+    assert r.method == "GET" and r.url.path == "/api/agent/recipes"
+    assert r.headers["authorization"] == "Bearer geheim"
+    assert r.url.params["q"] == "Hähnchen"
+    assert r.url.params["filter"] == "quick"  # unbekannter Filter fliegt raus
+    assert ergebnis == {
+        "ok": True,
+        "gefunden": 1,
+        "rezepte": [
+            {
+                "id": "8c1f",
+                "titel": "Coq au Riesling",
+                "minuten": 90,
+                "hauptzutaten": ["Hähnchen", "Kartoffel"],
+            }
+        ],
+    }
+
+
+@pytest.mark.asyncio
+async def test_suche_kuerzt_auf_drei_im_code():
+    # Auch wenn die API mehr liefert: das Modell sieht höchstens drei.
+    transport, seen = _antwort(200, {"total": 12, "recipes": [_kurz(i) for i in range(5)]})
+
+    ergebnis = await recipes.handle_search_recipes({"q": "Curry"}, transport=transport)
+
+    assert len(ergebnis["rezepte"]) == 3
+    assert ergebnis["gefunden"] == 12
+    assert seen[0].url.params["limit"] == "3"
+
+
+@pytest.mark.asyncio
+async def test_suche_ohne_treffer_ist_kein_fehler():
+    transport, _ = _antwort(200, {"total": 0, "recipes": []})
+
+    ergebnis = await recipes.handle_search_recipes({"q": "Quitte"}, transport=transport)
+
+    assert ergebnis["ok"] is True and ergebnis["rezepte"] == []
+    assert ergebnis["ack"]
+
+
+@pytest.mark.asyncio
+async def test_suche_totalMinutes_null_bleibt_null():
+    transport, _ = _antwort(200, {"total": 1, "recipes": [{**KURZFORM, "totalMinutes": None}]})
+
+    ergebnis = await recipes.handle_search_recipes({}, transport=transport)
+
+    assert ergebnis["rezepte"][0]["minuten"] is None
+
+
+@pytest.mark.asyncio
+async def test_aehnliche_vertrag_mit_shared_und_kuerzung():
+    body = {"recipes": [{**_kurz(i), "shared": ["Hähnchen"]} for i in range(5)]}
+    transport, seen = _antwort(200, body)
+
+    ergebnis = await recipes.handle_similar_recipes({"recipe_id": "abc"}, transport=transport)
+
+    assert seen[0].url.path == "/api/agent/recipes/abc/similar"
+    assert [r["id"] for r in ergebnis["rezepte"]] == ["id0", "id1", "id2"]
+
+
+@pytest.mark.asyncio
+async def test_aehnliche_404():
+    transport, _ = _antwort(404, {"error": "Not found"})
+
+    ergebnis = await recipes.handle_similar_recipes({"recipe_id": "weg"}, transport=transport)
+
+    assert ergebnis["ok"] is False and "nicht" in ergebnis["ack"]
+
+
+@pytest.mark.asyncio
+async def test_rezept_lesen():
+    body = {
+        "id": "abc",
+        "title": "Curry",
+        "servings": 2,
+        "prepTime": 10,
+        "cookTime": 15,
+        "instructions": ["Anbraten", "Kokosmilch dazu"],
+        "ingredients": [
+            {
+                "id": "x1",
+                "amount": "300",
+                "unit": "g",
+                "ingredientId": "i1",
+                "ingredient": {"id": "i1", "name": "Hähnchen"},
+            },
+            {
+                "id": "x2",
+                "amount": "0.5",
+                "unit": "l",
+                "ingredientId": "i2",
+                "ingredient": {"id": "i2", "name": "Kokosmilch"},
+            },
+            {
+                "id": "x3",
+                "amount": "2.00",
+                "unit": "stueck",
+                "ingredientId": "i3",
+                "ingredient": {"id": "i3", "name": "Zwiebeln"},
+            },
+        ],
+    }
+    transport, seen = _antwort(200, body)
+
+    ergebnis = await recipes.handle_read_recipe({"recipe_id": "abc"}, transport=transport)
+
+    assert seen[0].url.path == "/api/agent/recipes/abc"
+    assert ergebnis["titel"] == "Curry" and ergebnis["minuten"] == 25
+    assert ergebnis["zutaten"] == ["300 Gramm Hähnchen", "0.5 Liter Kokosmilch", "2 Zwiebeln"]
+    assert ergebnis["schritte"] == ["Anbraten", "Kokosmilch dazu"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "handler,args",
+    [
+        (recipes.handle_search_recipes, {"q": "x"}),
+        (recipes.handle_similar_recipes, {"recipe_id": "a"}),
+        (recipes.handle_read_recipe, {"recipe_id": "a"}),
+    ],
+)
+@pytest.mark.parametrize("status", [401, 403, 404, 500])
+async def test_fehlerstatus_geben_kurzes_ergebnis(handler, args, status):
+    transport, _ = _antwort(status, {"error": "x"})
+
+    ergebnis = await handler(args, transport=transport)
+
+    assert ergebnis["ok"] is False and ergebnis["ack"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "handler,args",
+    [
+        (recipes.handle_search_recipes, {"q": "x"}),
+        (recipes.handle_similar_recipes, {"recipe_id": "a"}),
+        (recipes.handle_read_recipe, {"recipe_id": "a"}),
+    ],
+)
+async def test_timeout_und_fehlende_konfiguration(handler, args, monkeypatch):
+    def handler_timeout(request):
+        raise httpx.ReadTimeout("zu langsam")
+
+    ergebnis = await handler(args, transport=httpx.MockTransport(handler_timeout))
+    assert ergebnis["ok"] is False and "antwortet gerade nicht" in ergebnis["ack"]
+
+    monkeypatch.delenv("KITELEFON_MISE_EN_PLACE_SECRET")
+    ergebnis = await handler(args, transport=httpx.MockTransport(handler_timeout))
+    assert ergebnis["ok"] is False and "nicht konfiguriert" in ergebnis["ack"]
+
+
+@pytest.mark.asyncio
+async def test_fehlende_id_wird_zurueckgefragt():
+    assert (await recipes.handle_read_recipe({}))["ok"] is False
+    assert (await recipes.handle_similar_recipes({"recipe_id": "a/../b"}))["ok"] is False
+
+
+def test_kochbuch_werkzeuge_im_schema_und_bei_elektra():
+    from kitelefon.werkzeugdienst import FERN_WERKZEUGE
+
+    namen = {s["name"] for s in ALL_TOOL_SCHEMAS}
+    for name in ("search_recipes", "similar_recipes", "read_recipe"):
+        assert name in namen
+        assert name in FERN_WERKZEUGE
+
+
+@pytest.mark.asyncio
+async def test_call_manager_leitet_die_werkzeuge_weiter(monkeypatch):
+    import kitelefon.call_manager as cm
+
+    gesehen = []
+
+    async def fake(args):
+        gesehen.append(args)
+        return {"ok": True}
+
+    for n in ("handle_search_recipes", "handle_similar_recipes", "handle_read_recipe"):
+        monkeypatch.setattr(cm, n, fake)
+    manager = object.__new__(cm.CallManager)
+    for name in ("search_recipes", "similar_recipes", "read_recipe"):
+        assert (await manager._tool_handler(name, {"x": name}))["ok"] is True
+    assert len(gesehen) == 3
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("handler", [recipes.handle_read_recipe, recipes.handle_similar_recipes])
+async def test_recipe_id_wird_url_kodiert(handler):
+    transport, seen = _antwort(200, {"recipes": []})
+
+    await handler({"recipe_id": "a?b#c"}, transport=transport)
+
+    url = seen[0].url
+    assert url.raw_path.startswith(b"/api/agent/recipes/a%3Fb%23c")
+    assert not url.query

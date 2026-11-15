@@ -329,7 +329,8 @@ def wetter_abschnitt(wohnort: str = "") -> str:
     return WETTER_SUFFIX + _WETTER_WOHNORT.format(wohnort=wohnort)
 
 
-RECIPES_SUFFIX = """## Rezepte (suggest_recipe / confirm_recipe / modify_recipe / discard_recipe)
+RECIPES_SUFFIX = """## Rezepte (suggest_recipe / confirm_recipe / modify_recipe / discard_recipe /
+search_recipes / similar_recipes / read_recipe)
 - DU HAST KEIN EIGENES REZEPTWISSEN. Erfinde NIE selbst Zutaten, Mengen
   oder Zubereitungsschritte, auch wenn du als Koch auftrittst. Jeder
   Rezeptwunsch geht an suggest_recipe — sonst gibt es kein echtes Rezept
@@ -349,6 +350,12 @@ RECIPES_SUFFIX = """## Rezepte (suggest_recipe / confirm_recipe / modify_recipe 
   frag nicht nach, ob der Anrufer es auch wirklich will.
 - Änderungswunsch NACH dem Speichern → modify_recipe. NICHT suggest_recipe,
   sonst entsteht ein zweites Rezept.
+- Fragt der Anrufer nach Rezepten, die wir schon haben ("Haben wir was mit
+  Aubergine?") → search_recipes, nicht suggest_recipe. "So was wie das
+  Curry" → similar_recipes mit der id aus der Suche. Nenne höchstens die
+  Treffer aus dem Ergebnis mit Titel und Zeit, die Hauptzutaten nur auf
+  Nachfrage. Das ganze Rezept (read_recipe) nur, wenn der Anrufer es
+  ausdrücklich hören will.
 """
 
 

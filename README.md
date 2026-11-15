@@ -43,6 +43,7 @@ als feste Abhängigkeit steht. Ohne Lesezugriff darauf schlägt `uv sync` fehl.
 | „Wer singt das gerade?"                                 | Liest Titel + Künstler des laufenden Stücks vor.                   |
 | „Brötchen auf die Einkaufsliste, sechs Stück."          | Landet sofort in Mise-en-Place.                                    |
 | „Schlag mir was für Pasta mit Spinat vor."              | Claude generiert ein vollständiges Rezept, KI liest die Zusammen­fassung vor. „Mit Knoblauch" → verfeinert. „Ja, speicher" → in Mise-en-Place. |
+| „Hab ich ein Rezept mit Aubergine?"                     | `search_recipes` fragt das Kochbuch in Mise-en-Place, nennt höchstens drei Treffer mit Titel und Zeit. `similar_recipes` und `read_recipe` folgen auf Nachfrage. |
 | „Erinnere mich morgen früh ans Brot, per Email an X."   | In die lokale SQLite-Queue → asynchroner Agent (Phase 2).          |
 
 Auf dem Mac als Entwicklungsmaschine: Leertaste = Hörer ab/auflegen,
@@ -53,7 +54,7 @@ Auf dem Mac als Entwicklungsmaschine: Leertaste = Hörer ab/auflegen,
 - **Python ≥ 3.11, asyncio** — eine Event-Loop, klare Cancellation bei
   Mid-Call-Hangup, niedrige CPU-Last auf dem Pi.
 - **OpenAI Realtime API** (GA, WebSocket, PCM16 mono 24 kHz, Server-VAD).
-  Function-Calling-Schema bringt **sieben Tools** mit, der Realtime-Loop
+  Function-Calling-Schema bringt die Tools (`src/kitelefon/tools.py`) mit, der Realtime-Loop
   routet eingehende Calls an die passenden Handler.
 - **Plattform-Abstraktion via Protocol** — `HookSwitch` und `Dialer` haben
   jeweils eine Keyboard- (Mac) und eine GPIO-Implementation (Pi).
@@ -144,6 +145,11 @@ wird sie nicht versucht.
   Vorlesen. Bei Verfeinerungen („weniger Sahne") wird neu generiert.
   Bei Zustimmung postet `confirm_recipe` an
   `POST /api/agent/recipes` — Mise-en-Place ergänzt Nährwerte fire-and-forget.
+- **Kochbuch durchsuchen:** `search_recipes` (`GET /api/agent/recipes`, Suchtext
+  und Filter `quick`, `proteinRich`, `fiberRich`), `similar_recipes`
+  (`/{id}/similar`) und `read_recipe` (`/{id}`, nur auf ausdrücklichen Wunsch).
+  Der Code kürzt die Trefferliste auf drei. Elektra bekommt alle drei über den
+  Werkzeug-Dienst.
 
 ### Delegation (Phase 2, vorbereitet)
 

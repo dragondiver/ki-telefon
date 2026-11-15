@@ -22,6 +22,7 @@ from __future__ import annotations
 import logging
 import os
 from typing import Literal
+from urllib.parse import quote
 
 import anthropic
 import httpx
@@ -351,3 +352,157 @@ async def handle_discard_recipe(args: dict) -> dict:
     title = _draft.title
     _draft = None
     return {"ok": True, "ack": f"'{title}' verworfen."}
+
+
+# --- Kochbuch durchsuchen (mise-en-place, nur lesend) -------------------------
+
+MAX_TREFFER = 3
+FILTER = ("quick", "proteinRich", "fiberRich")
+_MIN_FEHLER = "Mise-en-Place antwortet gerade nicht."
+
+
+async def _kochbuch_get(
+    pfad: str, params: dict | None, transport
+) -> tuple[dict | None, dict | None]:
+    """GET gegen die Agent-API. Liefert (json, None) oder (None, fertiges Fehlerergebnis).
+
+    Nie eine Exception nach aussen: ein Netzfehler darf das Gespräch nicht stören.
+    """
+    ziel = _mise_en_place()
+    if ziel is None:
+        return None, {"ok": False, "ack": "Mise-en-Place ist nicht konfiguriert."}
+    base_url, secret = ziel
+    try:
+        async with httpx.AsyncClient(timeout=15, transport=transport) as client:
+            r = await client.get(
+                f"{base_url}{pfad}",
+                headers={"Authorization": f"Bearer {secret}"},
+                params=params,
+            )
+    except httpx.HTTPError as exc:
+        log.warning("kochbuch %s: %s", pfad, exc)
+        return None, {"ok": False, "ack": _MIN_FEHLER, "error": str(exc)}
+
+    if r.status_code == 404:
+        return None, {"ok": False, "ack": "Dieses Rezept gibt es im Kochbuch nicht."}
+    if r.status_code in (401, 403):
+        log.error("kochbuch %s: %s, Secret falsch?", pfad, r.status_code)
+        return None, {
+            "ok": False,
+            "ack": "Ich komme gerade nicht ins Kochbuch.",
+            "error": f"HTTP {r.status_code}",
+        }
+    if r.status_code != 200:
+        log.error("kochbuch %s failed: %s %s", pfad, r.status_code, r.text)
+        return None, {
+            "ok": False,
+            "ack": "Die Suche im Kochbuch hat nicht geklappt.",
+            "error": f"HTTP {r.status_code}",
+        }
+    try:
+        daten = r.json()
+    except ValueError:
+        return None, {"ok": False, "ack": _MIN_FEHLER, "error": "keine gültige Antwort"}
+    if not isinstance(daten, dict):
+        return None, {"ok": False, "ack": _MIN_FEHLER, "error": "unerwartete Antwort"}
+    return daten, None
+
+
+def _treffer(rezept: dict) -> dict:
+    minuten = rezept.get("totalMinutes")
+    return {
+        "id": rezept.get("id"),
+        "titel": rezept.get("title"),
+        "minuten": minuten,
+        "hauptzutaten": list(rezept.get("mainIngredients") or []),
+    }
+
+
+def _treffer_ergebnis(daten: dict, gesamt: int | None) -> dict:
+    """Höchstens MAX_TREFFER Treffer; das Kürzen macht der Code, nicht das Modell."""
+    alle = [r for r in (daten.get("recipes") or []) if isinstance(r, dict)]
+    gesamt = gesamt if gesamt is not None else len(alle)
+    liste = [_treffer(r) for r in alle[:MAX_TREFFER]]
+    if not liste:
+        return {"ok": True, "gefunden": 0, "rezepte": [], "ack": "Dazu habe ich nichts gefunden."}
+    return {"ok": True, "gefunden": gesamt, "rezepte": liste}
+
+
+async def handle_search_recipes(args: dict, transport=None) -> dict:
+    q = str(args.get("q") or "").strip()[:200]
+    roh = args.get("filter") or []
+    if isinstance(roh, str):
+        roh = [roh]
+    filter_ = [f for f in roh if f in FILTER]
+    params: dict = {"limit": MAX_TREFFER}
+    if q:
+        params["q"] = q
+    if filter_:
+        params["filter"] = ",".join(filter_)
+    daten, fehler = await _kochbuch_get("/api/agent/recipes", params, transport)
+    if fehler:
+        return fehler
+    total = daten.get("total")
+    return _treffer_ergebnis(daten, total if isinstance(total, int) else None)
+
+
+async def handle_similar_recipes(args: dict, transport=None) -> dict:
+    recipe_id = str(args.get("recipe_id") or "").strip()
+    if not recipe_id or "/" in recipe_id or ".." in recipe_id:
+        return {"ok": False, "ack": "Zu welchem Rezept soll ich ähnliche suchen?"}
+    daten, fehler = await _kochbuch_get(
+        f"/api/agent/recipes/{quote(recipe_id, safe='')}/similar", None, transport
+    )
+    if fehler:
+        return fehler
+    ergebnis = _treffer_ergebnis(daten, None)
+    if not ergebnis["rezepte"]:
+        ergebnis["ack"] = "Dazu habe ich nichts Ähnliches gefunden."
+    return ergebnis
+
+
+def _menge_text(amount, unit, name: str) -> str:
+    """'300 Gramm Hähnchen', 'Prise Salz' — wie _menge, aber aus der API-Form."""
+    try:
+        zahl = float(amount)
+        zahl = int(zahl) if zahl == int(zahl) else zahl
+    except (TypeError, ValueError):
+        zahl = None
+    if unit == "stueck":
+        einheit = ""
+    else:
+        einheit = _EINHEIT_LANG.get(unit, unit or "")
+    return " ".join(str(t) for t in (zahl, einheit, name) if t not in (None, ""))
+
+
+async def handle_read_recipe(args: dict, transport=None) -> dict:
+    recipe_id = str(args.get("recipe_id") or "").strip()
+    if not recipe_id or "/" in recipe_id or ".." in recipe_id:
+        return {"ok": False, "ack": "Welches Rezept soll ich vorlesen?"}
+    daten, fehler = await _kochbuch_get(
+        f"/api/agent/recipes/{quote(recipe_id, safe='')}", None, transport
+    )
+    if fehler:
+        return fehler
+    zutaten = []
+    for z in daten.get("ingredients") or []:
+        # Prisma-Form: {amount, unit, ingredient: {name, ...}}; amount ist ein
+        # Decimal und kommt als String ("300", "0.5").
+        if not isinstance(z, dict):
+            continue
+        zutat = z.get("ingredient")
+        name = zutat.get("name") if isinstance(zutat, dict) else None
+        if not name:
+            continue
+        zutaten.append(_menge_text(z.get("amount"), z.get("unit"), name))
+    minuten = [daten.get("prepTime"), daten.get("cookTime")]
+    return {
+        "ok": True,
+        "titel": daten.get("title"),
+        "portionen": daten.get("servings"),
+        "minuten": sum(m for m in minuten if isinstance(m, int))
+        if all(isinstance(m, int) for m in minuten)
+        else None,
+        "zutaten": zutaten,
+        "schritte": [str(t) for t in (daten.get("instructions") or [])],
+    }
