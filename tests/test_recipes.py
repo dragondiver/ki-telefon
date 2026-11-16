@@ -335,11 +335,13 @@ def test_einheiten_stimmen_ueberall_ueberein():
 
     from kitelefon.tools import ADD_SHOPPING_ITEM_TOOL_SCHEMA
 
-    einheiten = set(typing.get_args(recipes.UNITS))
+    einheiten = set(recipes.EINHEITEN)
     werkzeug = ADD_SHOPPING_ITEM_TOOL_SCHEMA["parameters"]["properties"]["unit"]["enum"]
 
     assert "handvoll" in einheiten
-    assert set(werkzeug) == einheiten
+    assert len(recipes.EINHEITEN) == len(einheiten)
+    assert set(typing.get_args(recipes.UNITS)) == einheiten
+    assert tuple(werkzeug) == recipes.EINHEITEN
     assert set(recipes._EINHEIT_LANG) == einheiten
     for einheit in einheiten:
         assert einheit in recipes.SYSTEM_PROMPT
