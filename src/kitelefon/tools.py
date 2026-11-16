@@ -4,6 +4,7 @@ from typing import Any, Literal
 import httpx
 from pydantic import BaseModel, ValidationError
 
+from kitelefon.agents.recipes import EINHEITEN
 from kitelefon.agents.weather import GET_WEATHER_TOOL_SCHEMA
 from kitelefon.personen import EMPFAENGER, empfaenger_auswahl
 from kitelefon.tasks import TaskSink
@@ -74,20 +75,7 @@ ADD_SHOPPING_ITEM_TOOL_SCHEMA: dict[str, Any] = {
             },
             "unit": {
                 "type": "string",
-                "enum": [
-                    "stueck",
-                    "g",
-                    "kg",
-                    "ml",
-                    "l",
-                    "el",
-                    "tl",
-                    "prise",
-                    "bund",
-                    "dose",
-                    "packung",
-                    "handvoll",
-                ],
+                "enum": list(EINHEITEN),
                 "description": "Einheit. Bei Stückzahlen 'stueck' verwenden.",
                 "default": "stueck",
             },

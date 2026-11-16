@@ -37,9 +37,26 @@ log = logging.getLogger(__name__)
 MODEL = "claude-opus-5-5"
 EFFORT = "low"
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
-UNITS = Literal[
-    "g", "kg", "ml", "l", "stueck", "el", "tl", "prise", "bund", "dose", "packung", "handvoll"
-]
+# Einzige Quelle der Einheiten: Literal, Prompt und das Werkzeug fuer die
+# Einkaufsliste (tools.py) leiten sich davon ab. Die Langnamen unten und die
+# Liste in mise-en-place muessen von Hand mitgezogen werden (Test prueft ersteres).
+EINHEITEN = (
+    "g",
+    "kg",
+    "ml",
+    "l",
+    "stueck",
+    "el",
+    "tl",
+    "prise",
+    "bund",
+    "dose",
+    "packung",
+    "handvoll",
+)
+UNITS = Literal[EINHEITEN]  # type: ignore[valid-type]
+MAX_TITLE_LENGTH = 200
+MAX_SERVINGS = 100
 
 
 class Ingredient(BaseModel):
@@ -50,9 +67,9 @@ class Ingredient(BaseModel):
 
 
 class Recipe(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200)
+    title: str = Field(..., min_length=1, max_length=MAX_TITLE_LENGTH)
     description: str | None = None
-    servings: int = Field(default=4, ge=1, le=100)
+    servings: int = Field(default=4, ge=1, le=MAX_SERVINGS)
     prep_time_minutes: int | None = Field(default=None, ge=0)
     cook_time_minutes: int | None = Field(default=None, ge=0)
     ingredients: list[Ingredient] = Field(..., min_length=1)
@@ -60,12 +77,12 @@ class Recipe(BaseModel):
     tags: list[str] = Field(default_factory=list)
 
 
-SYSTEM_PROMPT = """Du bist ein erfahrener Hobbykoch und entwirfst alltagstaugliche \
+SYSTEM_PROMPT = f"""Du bist ein erfahrener Hobbykoch und entwirfst alltagstaugliche \
 Familien-Rezepte für Mitteleuropa. Antworten knapp, präzise und gut umsetzbar.
 
 Regeln:
 - Mengen für die angegebene Anzahl Portionen
-- Zutaten mit Mengen + Einheit (g, kg, ml, l, stueck, el, tl, prise, bund, dose, packung, handvoll)
+- Zutaten mit Mengen + Einheit ({", ".join(EINHEITEN)})
 - 4–10 Zubereitungsschritte, jeweils ein klarer Satz
 - Tags als kurze Stichworte (z.B. 'vegetarisch', 'schnell', 'pasta')
 - Zeitangaben in Minuten, realistisch
