@@ -35,7 +35,7 @@ jobs:
           TOKEN: ${{ secrets.SPRACHKURS_READ_TOKEN }}
         run: git config --global url."https://x-access-token:${TOKEN}@github.com/dragondiver/".insteadOf "https://github.com/dragondiver/"
 
-      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           python-version: "3.11"
           enable-cache: true
